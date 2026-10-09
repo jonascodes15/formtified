@@ -1,0 +1,118 @@
+@import "tailwindcss";
+
+/* Formtified design tokens. Change colours here and the whole app follows. */
+@theme {
+  --color-brand: #4ba256;
+  --color-brand-600: #3f8f49;
+  --color-brand-700: #34773c;
+  --color-brand-50: #e9f6eb;
+  --color-brand-100: #d5eed9;
+  --color-lime: #c9ef6b;
+  --color-forest: #123826;
+  --color-forest-800: #0c2a1c;
+  --color-ink: #10231a;
+  --color-muted: #5d6d64;
+  --color-soft: #8a9890;
+  --color-line: #e5ebe8;
+  --color-canvas: #f5f8fa;
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Kanit", "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  --shadow-card: 0 1px 2px rgb(16 35 26 / 0.04), 0 8px 24px -12px rgb(16 35 26 / 0.08);
+  --shadow-float: 0 12px 40px -12px rgb(16 35 26 / 0.25);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--color-brand-100);
+}
+
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-full px-5 h-11 text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap;
+}
+@utility btn-primary {
+  @apply btn bg-brand text-white hover:bg-brand-600;
+}
+@utility btn-dark {
+  @apply btn bg-forest text-white hover:bg-forest-800;
+}
+@utility btn-ghost {
+  @apply btn bg-white text-ink border border-line hover:bg-brand-50;
+}
+@utility btn-sm {
+  @apply h-9 px-4 text-[13px];
+}
+@utility card {
+  @apply bg-white rounded-3xl border border-line/70 shadow-[var(--shadow-card)];
+}
+@utility input {
+  @apply w-full rounded-2xl border border-line bg-white px-4 h-12 text-[15px] text-ink placeholder:text-soft outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/15;
+}
+@utility textarea {
+  @apply input h-auto py-3 min-h-28 leading-relaxed;
+}
+@utility label {
+  @apply block text-sm font-medium text-ink mb-1.5;
+}
+@utility chip {
+  @apply inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-3.5 h-9 text-[13px] font-medium text-ink hover:border-brand hover:bg-brand-50 transition;
+}
+@utility display {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-rise {
+  animation: rise 0.35s ease-out both;
+}
+@keyframes blink {
+  0%,
+  80%,
+  100% {
+    opacity: 0.25;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+.dot-typing span {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: currentColor;
+  animation: blink 1.2s infinite;
+}
+.dot-typing span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.dot-typing span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise,
+  .dot-typing span {
+    animation: none;
+  }
+}
