@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { VisitTracker } from "@/components/VisitTracker";
 
 export const metadata: Metadata = {
   title: { default: "Formtified: AI client onboarding forms", template: "%s · Formtified" },
@@ -25,7 +26,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Kanit:wght@500;600;700&display=swap"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <VisitTracker />
+      </body>
     </html>
   );
 }

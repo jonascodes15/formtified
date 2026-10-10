@@ -78,3 +78,61 @@ CREATE TABLE IF NOT EXISTS ai_usage (
   created_at        timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_ai_usage_user ON ai_usage (user_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_ai_usage_created ON ai_usage (created_at);
+
+-- ---------- Admin dashboard (added later; safe to run on an existing database) ----------
+
+-- Suspended users cannot sign in. last_seen_at powers "active users".
+ALTER TABLE users ADD COLUMN IF NOT EXISTS suspended_at timestamptz NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS last_seen_at timestamptz NULL;
+CREATE INDEX IF NOT EXISTS idx_users_created ON users (created_at);
+
+-- Notifications can now also be announcements sent by an admin.
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS kind varchar(20) NOT NULL DEFAULT 'response'; -- 'response' | 'admin'
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS title varchar(120) NULL;
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS link varchar(300) NULL;
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS broadcast_id integer NULL;
+ALTER TABLE notifications ALTER COLUMN message TYPE varchar(1000);
+CREATE INDEX IF NOT EXISTS idx_notifications_broadcast ON notifications (broadcast_id);
+
+-- One row per announcement an admin sends (to everyone, a plan, or one user).
+CREATE TABLE IF NOT EXISTS broadcasts (
+  id             integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  admin_id       integer NULL REFERENCES users(id) ON DELETE SET NULL,
+  audience       varchar(20) NOT NULL,   -- 'all' | 'free' | 'paid' | 'user'
+  target_user_id integer NULL REFERENCES users(id) ON DELETE SET NULL,
+  title          varchar(120) NOT NULL,
+  message        varchar(1000) NOT NULL,
+  link           varchar(300) NULL,
+  via_email      boolean NOT NULL DEFAULT false,
+  recipients     integer NOT NULL DEFAULT 0,
+  emails_sent    integer NOT NULL DEFAULT 0,
+  created_at     timestamptz NOT NULL DEFAULT now()
+);
+
+-- Site visits. No cookies: "visitor" is a hash that changes every day,
+-- so people can be counted per day without storing who they are.
+CREATE TABLE IF NOT EXISTS page_views (
+  id         bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  path       varchar(300) NOT NULL,
+  referrer   varchar(200) NULL,          -- the referring site's domain only
+  visitor    varchar(32) NOT NULL,
+  user_id    integer NULL REFERENCES users(id) ON DELETE SET NULL,
+  country    varchar(2) NULL,            -- from Vercel's location header
+  device     varchar(10) NOT NULL DEFAULT 'desktop', -- 'desktop' | 'mobile' | 'tablet'
+  browser    varchar(20) NULL,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_page_views_created ON page_views (created_at);
+
+-- Every action an admin takes (credits, suspensions, deletions, announcements).
+CREATE TABLE IF NOT EXISTS admin_audit (
+  id          integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  admin_id    integer NULL REFERENCES users(id) ON DELETE SET NULL,
+  admin_email varchar(190) NOT NULL,
+  action      varchar(40) NOT NULL,
+  target      varchar(200) NULL,
+  details     jsonb NULL,
+  created_at  timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_admin_audit_created ON admin_audit (created_at);

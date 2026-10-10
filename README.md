@@ -33,6 +33,7 @@ Open `.env.local` and fill in:
 2. **AUTH_SECRET**: Run this and paste the output:
    `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
 3. **AI_API_KEY**: Create a free key at https://console.groq.com/keys
+4. **ADMIN_EMAILS** (optional): your own email, so you can open the admin dashboard. See [Admin dashboard](#4-admin-dashboard).
 
 Then:
 
@@ -54,6 +55,7 @@ Open http://localhost:3000, click **Register**, and generate your first form.
 2. On https://vercel.com, click **Add New → Project** and import the repo.
 3. Under **Environment Variables**, add the same values as your `.env.local`, except:
    - Set `APP_URL` to your live URL, for example `https://yourdomain.com`.
+   - Add `ADMIN_EMAILS` so you can open `/admin` on the live site.
    - For `DATABASE_URL`, either paste the same Neon pooled connection string, or let Vercel set it for you (see below).
 4. Click **Deploy**.
 
@@ -76,6 +78,35 @@ Without `RESEND_API_KEY`, the app skips emails. You still get notifications in t
 3. Once the domain is verified, set `EMAIL_FROM=Formtified <notifications@yourdomain.com>`.
 
 Until the domain is verified, Resend's test sender can only email the address you signed up to Resend with.
+
+## 4. Admin dashboard
+
+A private area at `/admin` for running the platform.
+
+**Give yourself access**
+1. Sign up in the app normally with your email.
+2. Add that email to `ADMIN_EMAILS` in `.env.local` (and in Vercel's Environment Variables). For several admins, separate the emails with commas: `ADMIN_EMAILS=you@yourdomain.com,partner@yourdomain.com`.
+3. Restart `npm run dev` (on Vercel: redeploy). An **Admin** link appears in the sidebar, and an **Admin dashboard** button appears on the Account page on mobile.
+
+Everyone else gets a "page not found" at `/admin`, so the area stays hidden.
+
+**What's inside**
+
+| Page | What you can do |
+|---|---|
+| Overview | Users, active users, paid subscribers, visitors today, forms, responses, AI usage, charts of signups and visitors, newest users, system status and database size |
+| Site visits | Visitors and page views over 7/30/90 days, top pages, where visitors come from, countries, devices, browsers, and who's online now |
+| Users | Search, filter by plan or status, sort, export to CSV. Open a user to add or remove credits, change their plan, suspend or delete them, or send them a message |
+| Subscribers | Users on a paid plan, a breakdown by plan, and email opt-ins |
+| Forms | Every form on the platform. Close, reopen or delete any of them |
+| Notifications | Send an announcement to everyone, free users, paid subscribers, or one person. It appears in their notification bell, and optionally by email. Shows how many people have seen each one |
+| Activity log | Every change made by an admin, with who did it and when |
+
+**How site visits are counted.** Each page view sends a tiny request to `/api/track`. There are no cookies and no third-party tracker. A visitor is identified by a hash of the date, their IP address and their browser, which changes every day and can't be turned back into an IP. So "visitors" means unique visitors per day. Bots are ignored, and admin pages aren't counted. Countries come from Vercel, so they show as "Unknown" when running locally. In `npm run dev`, React runs effects twice, so local page views are counted double. That doesn't happen on the live site.
+
+**Suspending a user** signs them out immediately and stops them signing in. Their forms stay online. To take a form down, close it from the Forms page.
+
+**Plans** are `free`, `starter`, `pro` and `studio` (listed in `src/lib/types.ts`). Any plan except `free` counts as a paid subscriber. Payments aren't connected yet, so you set plans by hand on a user's page.
 
 ## How the AI keeps costs down
 
@@ -101,15 +132,18 @@ src/lib/
   ai.ts                        Prompts + AI calls (change prompts here)
   forms.ts                     Form queries, link (slug) creation, field validation
   templates.ts                 The 6 free templates (edit or add your own)
-  email.ts                     Resend emails
+  email.ts                     Resend emails (single and batch)
+  admin.ts                     Every admin dashboard query and action
+  analytics.ts                 Cookie-free site visit tracking
 src/app/
   page.tsx                     Landing page
   login/, signup/              Sign-in screen
   (app)/                       Signed-in area (sidebar on desktop, bottom nav on mobile)
     dashboard/  generate/  forms/[id]/  responses/  templates/  account/  credits/
   f/[slug]/                    The public form your clients fill
-  api/                         Backend routes (auth, ai, forms, public submit, export...)
-src/components/                UI pieces
+  admin/                       Admin dashboard pages (only for ADMIN_EMAILS)
+  api/                         Backend routes (auth, ai, forms, public submit, export, track, admin...)
+src/components/                UI pieces (admin/ holds the dashboard's charts, tables and forms)
 ```
 
 ## Useful commands
@@ -125,6 +159,8 @@ src/components/                UI pieces
 
 - **`DATABASE_URL is not set`**: The file must be named exactly `.env.local`. Restart `npm run dev` after editing it.
 - **`password authentication failed`**: The connection string was copied wrong or the password was reset. Copy it again from Neon's **Connect** button. If you reset the password in Neon, update `.env.local` and Vercel too.
+- **`column "suspended_at" does not exist` or `relation "page_views" does not exist`**: Your database is from before the admin dashboard was added. Run `npm run db:setup` again. It only adds what's missing and doesn't touch your data.
+- **`/admin` shows "page not found"**: Your email isn't in `ADMIN_EMAILS`, or you didn't restart `npm run dev` (or redeploy on Vercel) after adding it.
 - **`relation "users" does not exist`**: The tables haven't been created yet. Run `npm run db:setup`, or paste `db/schema.sql` into Neon's SQL Editor.
 - **The first request after a while is slow (1–2 seconds)**: That's normal on the free plan. Neon pauses an idle database after about 5 minutes and wakes it on the next query.
 - **`npm run db:setup` says DATABASE_URL is missing**: Check that `.env.local` is in the project folder (not inside `src/`) and that the line starts with `DATABASE_URL=` with no spaces around `=`.

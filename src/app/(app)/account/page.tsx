@@ -1,4 +1,6 @@
-import { requireUser } from "@/lib/auth";
+import Link from "next/link";
+import { ArrowUpRight, Shield } from "lucide-react";
+import { isAdmin, requireUser } from "@/lib/auth";
 import { queryOne } from "@/lib/db";
 import { TopBar } from "@/components/app/TopBar";
 import { AccountForm } from "@/components/app/AccountForm";
@@ -30,6 +32,18 @@ export default async function AccountPage() {
           </div>
         ))}
       </div>
+      {isAdmin(user.email) && (
+        <Link href="/admin" className="card mt-3 flex items-center justify-between gap-4 bg-forest p-5 text-white hover:bg-forest-800">
+          <span className="flex items-center gap-3">
+            <Shield className="size-5 text-lime" />
+            <span>
+              <span className="block font-semibold">Admin dashboard</span>
+              <span className="text-sm text-white/70">Users, site visits and announcements</span>
+            </span>
+          </span>
+          <ArrowUpRight className="size-5" />
+        </Link>
+      )}
       <AccountForm name={user.name} email={user.email} plan={user.plan} emailNotifications={user.email_notifications} />
     </>
   );

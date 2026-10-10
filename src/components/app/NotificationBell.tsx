@@ -2,14 +2,17 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Bell } from "lucide-react";
+import { Bell, Megaphone } from "lucide-react";
 import { timeAgo } from "@/lib/format";
 
 interface Item {
   id: number;
   form_id: number | null;
   response_id: number | null;
+  kind: string; // "response" | "admin"
+  title: string | null;
   message: string;
+  link: string | null;
   is_read: boolean;
   created_at: string;
 }
@@ -75,21 +78,42 @@ export function NotificationBell() {
             <p className="px-3 py-6 text-sm text-muted">No notifications yet. You will see new responses here.</p>
           ) : (
             <ul className="max-h-96 overflow-auto">
-              {items.map((n) => (
-                <li key={n.id}>
-                  <Link
-                    href={n.form_id ? `/responses?form=${n.form_id}${n.response_id ? `&r=${n.response_id}` : ""}` : "/responses"}
-                    onClick={() => setOpen(false)}
-                    className="flex gap-3 rounded-2xl px-3 py-2.5 hover:bg-canvas"
-                  >
-                    <span className={`mt-1.5 size-2 shrink-0 rounded-full ${n.is_read ? "bg-line" : "bg-brand"}`} />
+              {items.map((n) => {
+                const isAdminNote = n.kind === "admin";
+                const href = isAdminNote
+                  ? n.link
+                  : n.form_id
+                    ? `/responses?form=${n.form_id}${n.response_id ? `&r=${n.response_id}` : ""}`
+                    : "/responses";
+                const body = (
+                  <>
+                    {isAdminNote ? (
+                      <Megaphone className={`mt-0.5 size-4 shrink-0 ${n.is_read ? "text-soft" : "text-brand"}`} aria-hidden="true" />
+                    ) : (
+                      <span className={`mt-1.5 size-2 shrink-0 rounded-full ${n.is_read ? "bg-line" : "bg-brand"}`} />
+                    )}
                     <span className="min-w-0">
-                      <span className="block text-sm leading-snug">{n.message}</span>
-                      <span className="text-xs text-soft">{timeAgo(n.created_at)}</span>
+                      {n.title && <span className="block text-sm font-semibold leading-snug">{n.title}</span>}
+                      <span className={`block text-sm leading-snug ${isAdminNote ? "whitespace-pre-wrap text-muted" : ""}`}>{n.message}</span>
+                      <span className="text-xs text-soft">
+                        {isAdminNote ? "From Formtified · " : ""}
+                        {timeAgo(n.created_at)}
+                      </span>
                     </span>
-                  </Link>
-                </li>
-              ))}
+                  </>
+                );
+                return (
+                  <li key={n.id}>
+                    {href ? (
+                      <Link href={href} onClick={() => setOpen(false)} className="flex gap-3 rounded-2xl px-3 py-2.5 hover:bg-canvas">
+                        {body}
+                      </Link>
+                    ) : (
+                      <div className="flex gap-3 rounded-2xl px-3 py-2.5">{body}</div>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>

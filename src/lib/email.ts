@@ -23,6 +23,34 @@ export async function sendEmail(to: string, subject: string, html: string) {
   }
 }
 
+/**
+ * Sends the same email to many people, one separate email each (nobody sees the others' addresses).
+ * Uses Resend's batch endpoint: up to 100 emails per request. Returns how many were accepted.
+ * Note: Resend's free tier allows 100 emails per day.
+ */
+export async function sendEmailBatch(to: string[], subject: string, html: string) {
+  const key = process.env.RESEND_API_KEY;
+  if (!key || to.length === 0) return { sent: 0 };
+  const from = process.env.EMAIL_FROM || "Formtified <onboarding@resend.dev>";
+  let sent = 0;
+  for (let i = 0; i < to.length; i += 100) {
+    const chunk = to.slice(i, i + 100);
+    try {
+      const res = await fetch("https://api.resend.com/emails/batch", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+        body: JSON.stringify(chunk.map((addr) => ({ from, to: [addr], subject, html }))),
+        signal: AbortSignal.timeout(15000),
+      });
+      if (res.ok) sent += chunk.length;
+      else console.error("Batch email failed", res.status, await res.text().catch(() => ""));
+    } catch (e) {
+      console.error("Batch email error", e);
+    }
+  }
+  return { sent };
+}
+
 export function escapeHtml(s: string) {
   return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 }

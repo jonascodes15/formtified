@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FileText, WandSparkles, Inbox, UserRound, LayoutTemplate, Wallet } from "lucide-react";
+import { FileText, WandSparkles, Inbox, UserRound, LayoutTemplate, Wallet, Shield } from "lucide-react";
 import { Logo } from "@/components/Logo";
 
 const NAV = [
@@ -21,10 +21,12 @@ export function AppShell({
   children,
   credits,
   unreadResponses,
+  isAdmin = false,
 }: {
   children: React.ReactNode;
   credits: number;
   unreadResponses: number;
+  isAdmin?: boolean;
 }) {
   const path = usePathname();
   const active = (m: string[]) => m.some((p) => path === p || path.startsWith(p + "/"));
@@ -54,7 +56,7 @@ export function AppShell({
             );
           })}
           <div className="my-3 h-px bg-line" />
-          {EXTRA.map((item) => {
+          {[...EXTRA, ...(isAdmin ? [{ href: "/admin", label: "Admin", icon: Shield }] : [])].map((item) => {
             const on = active([item.href]);
             return (
               <Link

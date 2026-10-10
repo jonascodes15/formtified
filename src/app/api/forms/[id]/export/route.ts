@@ -2,14 +2,10 @@ import { apiUser } from "@/lib/auth";
 import { asJson, query } from "@/lib/db";
 import { notFound, unauthorized } from "@/lib/api";
 import { getOwnedForm } from "@/lib/forms";
+import { csvCell } from "@/lib/format";
 import type { Answers } from "@/lib/types";
 
-function cell(v: unknown) {
-  const s = Array.isArray(v) ? v.join("; ") : String(v ?? "");
-  // Quote every cell, and stop spreadsheet apps from running formulas typed by clients.
-  const safe = /^[=+\-@]/.test(s) ? `'${s}` : s;
-  return `"${safe.replace(/"/g, '""')}"`;
-}
+const cell = csvCell;
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const user = await apiUser();

@@ -1,4 +1,4 @@
-import { requireUser } from "@/lib/auth";
+import { isAdmin, requireUser } from "@/lib/auth";
 import { queryOne } from "@/lib/db";
 import { AppShell } from "@/components/app/AppShell";
 
@@ -9,7 +9,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     [user.id],
   );
   return (
-    <AppShell credits={user.credits} unreadResponses={Number(unread?.n ?? 0)}>
+    <AppShell credits={user.credits} unreadResponses={Number(unread?.n ?? 0)} isAdmin={isAdmin(user.email)}>
       {children}
     </AppShell>
   );

@@ -6,7 +6,7 @@ export async function GET() {
   const user = await apiUser();
   if (!user) return unauthorized();
   const items = await query(
-    `SELECT id, form_id, response_id, message, is_read, created_at
+    `SELECT id, form_id, response_id, kind, title, message, link, is_read, created_at
      FROM notifications WHERE user_id = $1 ORDER BY created_at DESC LIMIT 20`,
     [user.id],
   );

@@ -68,6 +68,10 @@ export interface ResponseRecord {
   form_title?: string;
 }
 
+/** Plan names. Everything except "free" counts as a paying subscriber in the admin dashboard. */
+export const PLANS = ["free", "starter", "pro", "studio"] as const;
+export type Plan = (typeof PLANS)[number];
+
 export interface SessionUser {
   id: number;
   name: string;
