@@ -9,6 +9,7 @@ import {
 import { CHOICE_TYPES, FIELD_LABELS, FIELD_TYPES, type FieldType, type FormField } from "@/lib/types";
 import { FormRenderer } from "@/components/form/FormRenderer";
 import { useOrigin } from "@/lib/useOrigin";
+import { AnimatePresence, m } from "motion/react";
 
 interface EditorForm {
   id: number;
@@ -129,54 +130,70 @@ export function FormEditor({ form }: { form: EditorForm }) {
     <div className="mt-8 grid gap-6 xl:grid-cols-[1fr_20rem]">
       <div className="min-w-0 space-y-4 order-2 xl:order-1">
         <div className="flex items-center gap-2 rounded-full bg-white border border-line p-1 w-fit">
-          <button onClick={() => setPreview(false)} className={`rounded-full px-4 h-9 text-sm font-medium ${!preview ? "bg-brand-50 text-brand-700" : "text-muted"}`}>
+          <button onClick={() => setPreview(false)} className={`relative isolate rounded-full px-4 h-9 text-sm font-medium transition-colors ${!preview ? "text-brand-700" : "text-muted"}`}>
+            {!preview && <m.span layoutId="editor-tab" className="absolute inset-0 -z-10 rounded-full bg-brand-50" />}
             Questions
           </button>
-          <button onClick={() => setPreview(true)} className={`inline-flex items-center gap-1.5 rounded-full px-4 h-9 text-sm font-medium ${preview ? "bg-brand-50 text-brand-700" : "text-muted"}`}>
+          <button onClick={() => setPreview(true)} className={`relative isolate inline-flex items-center gap-1.5 rounded-full px-4 h-9 text-sm font-medium transition-colors ${preview ? "text-brand-700" : "text-muted"}`}>
+            {preview && <m.span layoutId="editor-tab" className="absolute inset-0 -z-10 rounded-full bg-brand-50" />}
             <Eye className="size-4" /> Preview
           </button>
         </div>
 
-        {preview ? (
-          <div className="card p-5 sm:p-8">
-            <FormRenderer title={title} description={description} fields={fields} preview />
-          </div>
-        ) : (
-          <>
-            <div className="card p-5 sm:p-6 border-t-4 border-t-brand">
-              <input
-                value={title}
-                onChange={(e) => { setTitle(e.target.value); touch(); }}
-                className="display w-full bg-transparent text-2xl sm:text-3xl font-semibold outline-none"
-                placeholder="Form title"
-                aria-label="Form title"
-              />
-              <textarea
-                value={description}
-                onChange={(e) => { setDescription(e.target.value); touch(); }}
-                rows={2}
-                className="mt-2 w-full resize-none bg-transparent text-muted outline-none"
-                placeholder="A short note for your client (optional)"
-                aria-label="Form description"
-              />
-            </div>
+        <AnimatePresence mode="wait" initial={false}>
+          {preview ? (
+            <m.div key="preview" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8, transition: { duration: 0.12 } }} className="card p-5 sm:p-8">
+              <FormRenderer title={title} description={description} fields={fields} preview />
+            </m.div>
+          ) : (
+            <m.div key="questions" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8, transition: { duration: 0.12 } }} className="relative space-y-4">
+              <div className="card p-5 sm:p-6 border-t-4 border-t-brand">
+                <input
+                  value={title}
+                  onChange={(e) => { setTitle(e.target.value); touch(); }}
+                  className="display w-full bg-transparent text-2xl sm:text-3xl font-semibold outline-none"
+                  placeholder="Form title"
+                  aria-label="Form title"
+                />
+                <textarea
+                  value={description}
+                  onChange={(e) => { setDescription(e.target.value); touch(); }}
+                  rows={2}
+                  className="mt-2 w-full resize-none bg-transparent text-muted outline-none"
+                  placeholder="A short note for your client (optional)"
+                  aria-label="Form description"
+                />
+              </div>
 
-            {fields.map((f, i) => (
-              <FieldCard
-                key={f.id}
-                field={f}
-                index={i}
-                total={fields.length}
-                onChange={(p) => update(i, p)}
-                onMove={(d) => move(i, d)}
-                onRemove={() => remove(i)}
-                onDuplicate={() => duplicate(i)}
-              />
-            ))}
+              {/* Each question glides to its new place when moved, and slides in or out when added or deleted. */}
+              <AnimatePresence initial={false} mode="popLayout">
+                {fields.map((f, i) => (
+                  <m.div
+                    key={f.id}
+                    layout="position"
+                    initial={{ opacity: 0, y: 14, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.18 } }}
+                  >
+                    <FieldCard
+                      field={f}
+                      index={i}
+                      total={fields.length}
+                      onChange={(p) => update(i, p)}
+                      onMove={(d) => move(i, d)}
+                      onRemove={() => remove(i)}
+                      onDuplicate={() => duplicate(i)}
+                    />
+                  </m.div>
+                ))}
+              </AnimatePresence>
 
-            <AddField onAdd={add} />
-          </>
-        )}
+              <m.div layout="position">
+                <AddField onAdd={add} />
+              </m.div>
+            </m.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Share + save panel */}
@@ -217,7 +234,7 @@ export function FormEditor({ form }: { form: EditorForm }) {
           </Link>
 
           <button onClick={() => save()} disabled={saving || !dirty} className="btn-primary w-full">
-            {saving ? "Saving…" : saved && !dirty ? <><Check className="size-4" /> Saved</> : dirty ? "Save changes" : "All changes saved"}
+            {saving ? "Saving…" : saved && !dirty ? <><Check className="size-4 animate-pop" /> Saved</> : dirty ? "Save changes" : "All changes saved"}
           </button>
           {error && <p className="text-sm text-red-600">{error}</p>}
 
@@ -231,14 +248,21 @@ export function FormEditor({ form }: { form: EditorForm }) {
       </aside>
 
       {/* Sticky save bar on mobile when there are unsaved changes */}
-      {dirty && (
-        <div className="xl:hidden fixed inset-x-0 bottom-24 z-30 px-4">
-          <div className="mx-auto flex max-w-md items-center justify-between gap-3 rounded-full bg-forest py-2 pl-5 pr-2 text-white shadow-[var(--shadow-float)]">
-            <span className="text-sm">Unsaved changes</span>
-            <button onClick={() => save()} disabled={saving} className="btn h-10 bg-lime text-forest hover:bg-white">{saving ? "Saving…" : "Save"}</button>
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {dirty && (
+          <m.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 24, transition: { duration: 0.15 } }}
+            className="xl:hidden fixed inset-x-0 bottom-24 z-30 px-4"
+          >
+            <div className="mx-auto flex max-w-md items-center justify-between gap-3 rounded-full bg-forest py-2 pl-5 pr-2 text-white shadow-[var(--shadow-float)]">
+              <span className="text-sm">Unsaved changes</span>
+              <button onClick={() => save()} disabled={saving} className="btn h-10 bg-lime text-forest hover:bg-white">{saving ? "Saving…" : "Save"}</button>
+            </div>
+          </m.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -252,7 +276,7 @@ function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void 
       onClick={() => onChange(!on)}
       className={`relative h-7 w-12 shrink-0 rounded-full transition ${on ? "bg-brand" : "bg-line"}`}
     >
-      <span className={`absolute top-1 size-5 rounded-full bg-white shadow transition-all ${on ? "left-6" : "left-1"}`} />
+      <span className={`absolute top-1 size-5 rounded-full bg-white shadow transition-all duration-300 ease-spring ${on ? "left-6" : "left-1"}`} />
     </button>
   );
 }

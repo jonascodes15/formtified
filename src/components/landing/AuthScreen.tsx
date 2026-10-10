@@ -102,7 +102,7 @@ export function AuthScreen({ initialMode }: { initialMode: "signin" | "signup" }
                   {show ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>
               </Field>
-              {error && <p className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+              {error && <p key={error} className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700 animate-error-in">{error}</p>}
               <button disabled={busy} className="btn-primary h-12 w-full rounded-2xl text-[15px]">
                 {busy ? "Please wait…" : mode === "signin" ? "Sign In" : "Create account"}
               </button>
@@ -124,7 +124,7 @@ export function AuthScreen({ initialMode }: { initialMode: "signin" | "signup" }
             <div className="absolute left-16 top-[16.5rem] w-64"><MockResponseCard /></div>
           </div>
           <div className="relative mt-auto px-10 pb-8 text-center text-white">
-            <LogoMark className="mx-auto size-14" />
+            <LogoMark dark className="mx-auto size-14" />
             <div key={slide} className="animate-rise">
               <h2 className="display mt-5 text-3xl font-semibold leading-tight">{SLIDES[slide].title}</h2>
               <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-white/70">{SLIDES[slide].body}</p>

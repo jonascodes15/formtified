@@ -1,14 +1,24 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#5cb867"/>
-      <stop offset="1" stop-color="#17472f"/>
-    </linearGradient>
-  </defs>
-  <rect width="32" height="32" rx="9" fill="url(#g)"/>
-  <g transform="translate(-0.8 0)">
-    <rect x="8" y="7" width="4.2" height="18" rx="2.1" fill="#fff"/>
-    <rect x="8" y="7" width="11.5" height="4.2" rx="2.1" fill="#fff"/>
-    <path d="M12.3 17.6l3.1 3.1 8.6-8.6" stroke="#c9ef6b" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <rect width="32" height="32" rx="7" fill="#123826"/>
+  <g transform="translate(1.8 3.2) scale(0.8)">
+    <mask id="m" maskUnits="userSpaceOnUse" x="0" y="0" width="32" height="32">
+      <rect width="32" height="32" fill="#fff"/>
+      <g transform="translate(17.2 27.6) rotate(-45)" fill="#000" stroke="#000" stroke-width="3.2" stroke-linejoin="round">
+        <path d="M0 0 4.4-2.5H14v5H4.4z"/>
+        <rect x="14.6" y="-2.5" width="3.4" height="5" rx="1.4"/>
+      </g>
+    </mask>
+    <g mask="url(#m)">
+      <rect x="5" y="3" width="19" height="26" rx="3.4" fill="none" stroke="#c9ef6b" stroke-width="2.4"/>
+      <rect x="9.6" y="8" width="3.6" height="15" rx="0.9" fill="#ffffff"/>
+      <rect x="9.6" y="8" width="10.4" height="3.4" rx="0.9" fill="#ffffff"/>
+      <rect x="9.6" y="14.2" width="7.8" height="3.2" rx="0.9" fill="#ffffff"/>
+    </g>
+    <g transform="translate(17.2 27.6) rotate(-45)">
+      <path d="M0 0 4.4-2.5v5z" fill="#ffffff"/>
+      <path d="M0 0 1.7-.97v1.94z" fill="#123826"/>
+      <rect x="4.4" y="-2.5" width="9.6" height="5" fill="#c9ef6b"/>
+      <rect x="14.6" y="-2.5" width="3.4" height="5" rx="1.4" fill="#c9ef6b"/>
+    </g>
   </g>
 </svg>

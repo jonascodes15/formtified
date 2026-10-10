@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, CheckCircle2 } from "lucide-react";
+import { Check } from "lucide-react";
 import type { FormField } from "@/lib/types";
 
 type Value = string | string[];
@@ -43,6 +43,15 @@ export function FormRenderer({
       else if (!empty && f.type === "email" && !/^\S+@\S+\.\S+$/.test(String(v))) next[f.id] = "Enter a valid email address.";
     }
     setErrors(next);
+    // Each unanswered required question gives a small shake (skipped for people who prefer reduced motion).
+    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      for (const id of Object.keys(next)) {
+        document.getElementById(`q-${id}`)?.animate(
+          [{ translate: "0 0" }, { translate: "-6px 0" }, { translate: "5px 0" }, { translate: "-3px 0" }, { translate: "2px 0" }, { translate: "0 0" }],
+          { duration: 420, easing: "ease-out" },
+        );
+      }
+    }
     const first = Object.keys(next).find((k) => next[k]);
     if (first) document.getElementById(`q-${first}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
     return !first;
@@ -70,10 +79,21 @@ export function FormRenderer({
 
   if (done) {
     return (
-      <div className="py-10 text-center animate-rise">
-        <CheckCircle2 className="mx-auto size-16 text-brand" strokeWidth={1.5} />
-        <h2 className="display mt-4 text-3xl font-semibold">Thank you!</h2>
-        <p className="mx-auto mt-2 max-w-sm text-muted">
+      <div className="py-10 text-center">
+        {/* The circle and tick draw themselves in */}
+        <svg viewBox="0 0 64 64" className="mx-auto size-20 animate-pop" aria-hidden="true">
+          <circle cx="32" cy="32" r="30" className="fill-brand-50" />
+          <circle
+            cx="32" cy="32" r="30" fill="none" stroke="var(--color-brand)" strokeWidth="3"
+            pathLength={1} strokeDasharray="1" className="animate-draw" style={{ rotate: "-90deg", transformOrigin: "center" }}
+          />
+          <path
+            d="M20 33l8 8 16-17" fill="none" stroke="var(--color-brand)" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round"
+            pathLength={1} strokeDasharray="1" className="animate-draw [animation-delay:0.5s]"
+          />
+        </svg>
+        <h2 className="display mt-4 text-3xl font-semibold animate-rise" style={{ "--i": 8 } as React.CSSProperties}>Thank you!</h2>
+        <p className="mx-auto mt-2 max-w-sm text-muted animate-rise" style={{ "--i": 10 } as React.CSSProperties}>
           Your answers have been sent{ownerName ? ` to ${ownerName}` : ""}. They will be in touch soon.
         </p>
       </div>
@@ -84,11 +104,43 @@ export function FormRenderer({
   let n = 0;
   for (const f of fields) if (f.type !== "section") questionNumbers.set(f.id, ++n);
 
+  // How much of the form is filled in, for the progress bar.
+  const answered = fields.filter((f) => {
+    if (f.type === "section") return false;
+    const v = values[f.id];
+    return Array.isArray(v) ? v.length > 0 : Boolean(String(v ?? "").trim());
+  }).length;
+  const progress = n ? answered / n : 0;
+
   return (
     <form onSubmit={submit} noValidate>
       <h1 className="display text-3xl sm:text-4xl font-semibold leading-tight">{title}</h1>
       {description && <p className="mt-3 text-[16px] leading-relaxed text-muted whitespace-pre-wrap">{description}</p>}
       <p className="mt-3 text-sm text-soft"><span className="text-red-500">*</span> Required</p>
+
+      {n > 1 && (
+        <div
+          className="sticky top-3 z-10 mt-6 rounded-2xl border border-line bg-white/90 px-4 py-3 shadow-[var(--shadow-card)] backdrop-blur"
+          role="progressbar"
+          aria-label="Questions answered"
+          aria-valuemin={0}
+          aria-valuemax={n}
+          aria-valuenow={answered}
+        >
+          <div className="flex items-center justify-between gap-3 text-xs font-medium">
+            <span className={answered === n ? "flex items-center gap-1.5 text-brand-700" : "text-muted"}>
+              {answered === n ? <><Check className="size-3.5 animate-pop" strokeWidth={3} /> All questions answered</> : `${answered} of ${n} answered`}
+            </span>
+            <span className="tabular-nums text-soft">{Math.round(progress * 100)}%</span>
+          </div>
+          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-brand-50">
+            <div
+              className="h-full origin-left rounded-full bg-brand transition-transform duration-500 ease-spring"
+              style={{ transform: `scaleX(${progress})` }}
+            />
+          </div>
+        </div>
+      )}
 
       <div className="mt-8 space-y-7">
         {fields.map((f) =>
@@ -108,7 +160,7 @@ export function FormRenderer({
               <div className="mt-3">
                 <Input field={f} value={values[f.id]} onChange={(v) => set(f.id, v)} invalid={Boolean(errors[f.id])} />
               </div>
-              {errors[f.id] && <p className="mt-1.5 text-sm text-red-600">{errors[f.id]}</p>}
+              {errors[f.id] && <p className="mt-1.5 text-sm text-red-600 animate-error-in">{errors[f.id]}</p>}
             </div>
           ),
         )}
@@ -117,7 +169,7 @@ export function FormRenderer({
       {/* Hidden from people; bots fill it. */}
       <input type="text" name="website" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
 
-      {serverError && <p className="mt-6 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700">{serverError}</p>}
+      {serverError && <p className="mt-6 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700 animate-error-in">{serverError}</p>}
       <button type="submit" disabled={submitting || preview} className="btn-primary mt-10 h-13 w-full text-base sm:w-auto sm:px-10">
         {preview ? "Submit (disabled in preview)" : submitting ? "Sending…" : "Submit"}
       </button>
@@ -155,9 +207,9 @@ function Input({ field, value, onChange, invalid }: { field: FormField; value: V
             const on = str === o;
             return (
               <button type="button" role="radio" aria-checked={on} key={o} onClick={() => onChange(on ? "" : o)}
-                className={`flex items-center gap-3 rounded-2xl border px-4 py-3 text-left text-[15px] transition ${on ? "border-brand bg-brand-50" : "border-line bg-white hover:border-brand/50"}`}>
+                className={`flex items-center gap-3 rounded-2xl border px-4 py-3 text-left text-[15px] transition ease-spring active:scale-[0.98] ${on ? "border-brand bg-brand-50" : "border-line bg-white hover:border-brand/50"}`}>
                 <span className={`grid size-5 shrink-0 place-items-center rounded-full border-2 ${on ? "border-brand" : "border-line"}`}>
-                  {on && <span className="size-2.5 rounded-full bg-brand" />}
+                  {on && <span className="size-2.5 rounded-full bg-brand animate-pop" />}
                 </span>
                 {o}
               </button>
@@ -173,9 +225,9 @@ function Input({ field, value, onChange, invalid }: { field: FormField; value: V
             const on = arr.includes(o);
             return (
               <button type="button" role="checkbox" aria-checked={on} key={o} onClick={() => onChange(on ? arr.filter((x) => x !== o) : [...arr, o])}
-                className={`flex items-center gap-3 rounded-2xl border px-4 py-3 text-left text-[15px] transition ${on ? "border-brand bg-brand-50" : "border-line bg-white hover:border-brand/50"}`}>
+                className={`flex items-center gap-3 rounded-2xl border px-4 py-3 text-left text-[15px] transition ease-spring active:scale-[0.98] ${on ? "border-brand bg-brand-50" : "border-line bg-white hover:border-brand/50"}`}>
                 <span className={`grid size-5 shrink-0 place-items-center rounded-md border-2 ${on ? "border-brand bg-brand text-white" : "border-line"}`}>
-                  {on && <Check className="size-3.5" strokeWidth={3} />}
+                  {on && <Check className="size-3.5 animate-pop" strokeWidth={3} />}
                 </span>
                 {o}
               </button>

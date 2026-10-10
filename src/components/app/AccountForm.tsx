@@ -69,7 +69,7 @@ export function AccountForm({ name: initialName, email, plan, emailNotifications
               onClick={() => toggleNotify(!notify)}
               className={`relative h-7 w-12 shrink-0 rounded-full transition ${notify ? "bg-brand" : "bg-line"}`}
             >
-              <span className={`absolute top-1 size-5 rounded-full bg-white shadow transition-all ${notify ? "left-6" : "left-1"}`} />
+              <span className={`absolute top-1 size-5 rounded-full bg-white shadow transition-all duration-300 ease-spring ${notify ? "left-6" : "left-1"}`} />
             </button>
           </label>
         </div>

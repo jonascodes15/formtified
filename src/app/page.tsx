@@ -210,7 +210,7 @@ function DashboardMock() {
   return (
     <div className="grid overflow-hidden rounded-t-2xl bg-white text-left sm:grid-cols-[11rem_1fr]" aria-hidden="true">
       <div className="hidden bg-forest p-4 sm:block">
-        <div className="flex items-center gap-1.5 text-white"><LogoMark className="size-6" /><Wordmark dark className="text-sm" /></div>
+        <div className="flex items-center gap-1.5 text-white"><LogoMark dark className="size-6" /><Wordmark dark className="text-xs" /></div>
         <div className="mt-6 space-y-1 text-[12px]">
           {["Forms", "Generate", "Responses", "Account"].map((x, i) => (
             <div key={x} className={`rounded-lg px-3 py-2 ${i === 0 ? "bg-lime font-semibold text-forest" : "text-white/70"}`}>{x}</div>

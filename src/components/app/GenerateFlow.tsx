@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowUp, Check, Copy, ExternalLink, Pencil, RotateCcw, Sparkles, MessageCircle } from "lucide-react";
-import { LogoMark } from "@/components/Logo";
+import { LogoTile } from "@/components/Logo";
 
 interface Question {
   q: string;
@@ -259,7 +259,7 @@ export function GenerateFlow({ credits: initialCredits }: { credits: number }) {
 function AiBubble({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex gap-3 animate-rise">
-      <LogoMark className="size-9 shrink-0" />
+      <LogoTile className="size-9" />
       <div className="card min-w-0 flex-1 rounded-3xl rounded-tl-lg p-5">{children}</div>
     </div>
   );

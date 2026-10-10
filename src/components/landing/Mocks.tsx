@@ -1,5 +1,5 @@
 import { Check, FileText, Sparkles } from "lucide-react";
-import { LogoMark } from "@/components/Logo";
+import { LogoTile } from "@/components/Logo";
 
 /* Small illustrative UI cards used on the landing and sign-in pages. */
 
@@ -11,7 +11,7 @@ export function MockChatCard() {
         Client wants a bakery website with online ordering and delivery in Lekki.
       </div>
       <div className="mt-2 flex gap-2">
-        <LogoMark className="size-5 shrink-0" />
+        <LogoTile className="size-5" />
         <div className="rounded-xl rounded-tl-sm border border-line px-3 py-2 text-[11px] leading-snug">
           Should the form ask about payment options?
           <div className="mt-1.5 flex gap-1">

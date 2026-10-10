@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Search, SlidersHorizontal, FileText, MoreVertical, Link2, Copy, Trash2, Inbox, Pencil, Check } from "lucide-react";
+import { AnimatePresence, m } from "motion/react";
 import { plural, timeAgo } from "@/lib/format";
 
 interface Item {
@@ -84,34 +85,41 @@ export function FormsList({ forms }: { forms: Item[] }) {
         </button>
       </div>
 
-      {showFilters && (
-        <div className="card mt-3 grid gap-4 p-5 sm:grid-cols-2 animate-rise">
-          <div>
-            <p className="mb-2 text-sm font-medium text-muted">Status</p>
-            <div className="flex flex-wrap gap-2">
-              {(["all", "published", "closed"] as Status[]).map((s) => (
-                <button key={s} onClick={() => setStatus(s)} className={`chip capitalize ${status === s ? "border-brand bg-brand-50 text-brand-700" : ""}`}>
-                  {s === "published" ? "Accepting responses" : s}
-                </button>
-              ))}
+      <AnimatePresence initial={false}>
+        {showFilters && (
+          <m.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8, transition: { duration: 0.15 } }}
+            className="card mt-3 grid gap-4 p-5 sm:grid-cols-2"
+          >
+            <div>
+              <p className="mb-2 text-sm font-medium text-muted">Status</p>
+              <div className="flex flex-wrap gap-2">
+                {(["all", "published", "closed"] as Status[]).map((s) => (
+                  <button key={s} onClick={() => setStatus(s)} className={`chip capitalize ${status === s ? "border-brand bg-brand-50 text-brand-700" : ""}`}>
+                    {s === "published" ? "Accepting responses" : s}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
-          <div>
-            <p className="mb-2 text-sm font-medium text-muted">Sort by</p>
-            <div className="flex flex-wrap gap-2">
-              {([
-                ["recent", "Recently updated"],
-                ["responses", "Most responses"],
-                ["az", "A to Z"],
-              ] as [Sort, string][]).map(([s, l]) => (
-                <button key={s} onClick={() => setSort(s)} className={`chip ${sort === s ? "border-brand bg-brand-50 text-brand-700" : ""}`}>
-                  {l}
-                </button>
-              ))}
+            <div>
+              <p className="mb-2 text-sm font-medium text-muted">Sort by</p>
+              <div className="flex flex-wrap gap-2">
+                {([
+                  ["recent", "Recently updated"],
+                  ["responses", "Most responses"],
+                  ["az", "A to Z"],
+                ] as [Sort, string][]).map(([s, l]) => (
+                  <button key={s} onClick={() => setSort(s)} className={`chip ${sort === s ? "border-brand bg-brand-50 text-brand-700" : ""}`}>
+                    {l}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </m.div>
+        )}
+      </AnimatePresence>
 
       <h2 className="display mt-10 text-2xl font-semibold">Your forms</h2>
 
@@ -127,43 +135,60 @@ export function FormsList({ forms }: { forms: Item[] }) {
       ) : shown.length === 0 ? (
         <p className="mt-5 text-muted">No forms match your search.</p>
       ) : (
-        <ul className={`mt-5 grid gap-4 md:grid-cols-2 ${busy ? "opacity-60" : ""}`}>
-          {shown.map((f) => (
-            <li key={f.id} className="card relative flex items-center gap-5 p-5 sm:p-6 hover:border-brand/40 transition">
-              <Link href={`/forms/${f.id}`} className="absolute inset-0 rounded-3xl" aria-label={`Open ${f.title}`} />
-              <span className="grid size-[4.5rem] shrink-0 place-items-center rounded-3xl bg-brand-50">
-                <FileText className="size-8" strokeWidth={1.6} />
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="line-clamp-2 text-[17px] font-semibold leading-snug">{f.title}</p>
-                <p className="mt-1 text-[15px] text-muted">
-                  Updated {timeAgo(f.updated_at)} · {plural(f.response_count, "response")}
-                  {f.status === "closed" && <span className="ml-2 rounded-full bg-canvas px-2 py-0.5 text-xs">Closed</span>}
-                </p>
-              </div>
-              <div className="relative z-10">
-                <button
-                  onClick={() => setMenu(menu === f.id ? null : f.id)}
-                  aria-label="Form actions"
-                  className="grid size-10 place-items-center rounded-full hover:bg-canvas"
-                >
-                  {copied === f.id ? <Check className="size-5 text-brand" /> : <MoreVertical className="size-5 text-muted" />}
-                </button>
-                {menu === f.id && (
-                  <>
-                    <button className="fixed inset-0 z-10 cursor-default" aria-hidden="true" tabIndex={-1} onClick={() => setMenu(null)} />
-                    <div className="absolute right-0 top-11 z-20 w-52 card p-1.5 animate-rise">
-                      <MenuLink href={`/forms/${f.id}`} icon={Pencil} label="Edit form" />
-                      <MenuLink href={`/responses?form=${f.id}`} icon={Inbox} label="View responses" />
-                      <MenuButton onClick={() => copyLink(f)} icon={Link2} label="Copy share link" />
-                      <MenuButton onClick={() => duplicate(f)} icon={Copy} label="Duplicate" />
-                      <MenuButton onClick={() => remove(f)} icon={Trash2} label="Delete" danger />
-                    </div>
-                  </>
-                )}
-              </div>
-            </li>
-          ))}
+        <ul className={`relative mt-5 grid gap-4 md:grid-cols-2 ${busy ? "opacity-60" : ""}`}>
+          <AnimatePresence initial={false} mode="popLayout">
+            {shown.map((f, i) => (
+              <m.li
+                key={f.id}
+                layout="position"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0, transition: { delay: Math.min(i, 12) * 0.045 } }}
+                exit={{ opacity: 0, scale: 0.94, transition: { duration: 0.2 } }}
+                className={`card card-hover relative flex items-center gap-5 p-5 sm:p-6 hover:border-brand/40 ${menu === f.id ? "z-20" : ""}`}
+              >
+                <Link href={`/forms/${f.id}`} className="absolute inset-0 rounded-3xl" aria-label={`Open ${f.title}`} />
+                <span className="grid size-[4.5rem] shrink-0 place-items-center rounded-3xl bg-brand-50">
+                  <FileText className="size-8" strokeWidth={1.6} />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="line-clamp-2 text-[17px] font-semibold leading-snug">{f.title}</p>
+                  <p className="mt-1 text-[15px] text-muted">
+                    Updated {timeAgo(f.updated_at)} · {plural(f.response_count, "response")}
+                    {f.status === "closed" && <span className="ml-2 rounded-full bg-canvas px-2 py-0.5 text-xs">Closed</span>}
+                  </p>
+                </div>
+                <div className="relative z-10">
+                  <button
+                    onClick={() => setMenu(menu === f.id ? null : f.id)}
+                    aria-label="Form actions"
+                    className="grid size-10 place-items-center rounded-full hover:bg-canvas"
+                  >
+                    {copied === f.id ? <Check className="size-5 text-brand" /> : <MoreVertical className="size-5 text-muted" />}
+                  </button>
+                  <AnimatePresence>
+                    {menu === f.id && (
+                      <>
+                        <button className="fixed inset-0 z-10 cursor-default" aria-hidden="true" tabIndex={-1} onClick={() => setMenu(null)} />
+                        <m.div
+                          initial={{ opacity: 0, scale: 0.92, y: -4 }}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.12 } }}
+                          style={{ transformOrigin: "top right" }}
+                          className="absolute right-0 top-11 z-20 w-52 card p-1.5"
+                        >
+                          <MenuLink href={`/forms/${f.id}`} icon={Pencil} label="Edit form" />
+                          <MenuLink href={`/responses?form=${f.id}`} icon={Inbox} label="View responses" />
+                          <MenuButton onClick={() => copyLink(f)} icon={Link2} label="Copy share link" />
+                          <MenuButton onClick={() => duplicate(f)} icon={Copy} label="Duplicate" />
+                          <MenuButton onClick={() => remove(f)} icon={Trash2} label="Delete" danger />
+                        </m.div>
+                      </>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </m.li>
+            ))}
+          </AnimatePresence>
         </ul>
       )}
     </section>

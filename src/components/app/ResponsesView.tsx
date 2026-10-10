@@ -113,17 +113,17 @@ export function ResponsesView({
       <div className="mt-6 grid gap-5 lg:grid-cols-[22rem_1fr]">
         <ul className={`space-y-2 ${open ? "hidden lg:block" : ""}`}>
           {shown.length === 0 && <li className="card p-6 text-center text-muted">No responses {q ? "match your search" : "yet"}.</li>}
-          {shown.map((r) => (
-            <li key={r.id}>
+          {shown.map((r, i) => (
+            <li key={r.id} className="animate-rise" style={{ "--i": i } as React.CSSProperties}>
               <button
                 onClick={() => openResponse(r)}
-                className={`card flex w-full items-center gap-3 rounded-2xl p-4 text-left transition ${openId === r.id ? "border-brand bg-brand-50/50" : "hover:border-brand/40"}`}
+                className={`card flex w-full items-center gap-3 rounded-2xl p-4 text-left transition ease-spring active:scale-[0.99] ${openId === r.id ? "border-brand bg-brand-50/50" : "hover:border-brand/40"}`}
               >
                 <span className="grid size-11 shrink-0 place-items-center rounded-full bg-brand-100 text-sm font-medium">{initials(r.name || r.email || "?")}</span>
                 <span className="min-w-0 flex-1">
                   <span className="flex items-center gap-2">
                     <span className={`truncate ${r.is_read ? "font-medium" : "font-semibold"}`}>{r.name || r.email || "Anonymous"}</span>
-                    {!r.is_read && <span className="size-2 shrink-0 rounded-full bg-brand" aria-label="New" />}
+                    {!r.is_read && <span className="size-2 shrink-0 rounded-full bg-brand animate-pop" aria-label="New" />}
                   </span>
                   <span className="block truncate text-sm text-muted">{formMap.get(r.form_id)?.title}</span>
                 </span>

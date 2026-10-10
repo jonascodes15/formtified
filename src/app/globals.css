@@ -18,9 +18,60 @@
 
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display: "Kanit", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-logo: "Russo One", "Kanit", ui-sans-serif, system-ui, sans-serif;
 
   --shadow-card: 0 1px 2px rgb(16 35 26 / 0.04), 0 8px 24px -12px rgb(16 35 26 / 0.08);
   --shadow-float: 0 12px 40px -12px rgb(16 35 26 / 0.25);
+  --shadow-lift: 0 2px 4px rgb(16 35 26 / 0.04), 0 16px 32px -14px rgb(16 35 26 / 0.2);
+
+  /* Motion. Spring curves computed from real spring physics, so CSS and Motion feel the same.
+     ease-spring: gentle (about 4% overshoot) for buttons and cards.
+     ease-bounce: playful (about 15% overshoot) for small things that pop, like badges and ticks. */
+  --ease-spring: linear(0, 0.098, 0.303, 0.524, 0.715, 0.858, 0.952, 1.006, 1.032, 1.038, 1.035, 1.027, 1.019, 1.011, 1.006, 1.002, 1, 0.999, 0.999, 0.999, 0.999, 0.999, 1, 1, 1, 1, 1, 1, 1);
+  --ease-bounce: linear(0, 0.092, 0.304, 0.553, 0.782, 0.96, 1.076, 1.134, 1.147, 1.13, 1.097, 1.06, 1.028, 1.003, 0.987, 0.979, 0.978, 0.981, 0.986, 0.992, 0.997, 1, 1.002, 1.003, 1.003, 1.003, 1.002, 1.001, 1, 1, 1, 1, 1);
+
+  --animate-pop: pop 0.45s var(--ease-bounce) both;
+  --animate-wiggle: wiggle 0.7s ease-out;
+  --animate-error-in: error-in 0.25s ease-out both;
+  --animate-draw: draw 0.6s 0.15s ease-out both;
+
+  @keyframes pop {
+    from {
+      opacity: 0;
+      scale: 0.4;
+    }
+    to {
+      opacity: 1;
+      scale: 1;
+    }
+  }
+  @keyframes wiggle {
+    0%, 100% { rotate: 0deg; }
+    15% { rotate: 14deg; }
+    30% { rotate: -12deg; }
+    45% { rotate: 8deg; }
+    60% { rotate: -5deg; }
+    75% { rotate: 2deg; }
+  }
+  @keyframes error-in {
+    from {
+      opacity: 0;
+      translate: 0 -4px;
+    }
+    to {
+      opacity: 1;
+      translate: 0 0;
+    }
+  }
+  /* For SVG strokes with pathLength="1": the line draws itself. */
+  @keyframes draw {
+    from {
+      stroke-dashoffset: 1;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
 }
 
 html {
@@ -44,14 +95,25 @@ body {
   background: var(--color-brand-100);
 }
 
+/* Every button: springs down a little when pressed; arrow icons slide forward on hover. */
 @utility btn {
-  @apply inline-flex items-center justify-center gap-2 rounded-full px-5 h-11 text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap;
+  @apply inline-flex items-center justify-center gap-2 rounded-full px-5 h-11 text-sm font-semibold whitespace-nowrap select-none
+    transition-[background-color,border-color,color,box-shadow,translate,scale] duration-200 ease-spring
+    active:scale-[0.97] disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100;
+
+  & svg.lucide-arrow-right {
+    transition: translate 0.25s var(--ease-spring);
+  }
+  &:hover:not(:disabled) svg.lucide-arrow-right {
+    translate: 3px 0;
+  }
 }
+/* Solid buttons also lift slightly on hover (mouse only; phones don't get stuck hover states). */
 @utility btn-primary {
-  @apply btn bg-brand text-white hover:bg-brand-600;
+  @apply btn bg-brand text-white hover:bg-brand-600 hover:-translate-y-px hover:shadow-[var(--shadow-lift)] disabled:hover:translate-y-0 disabled:hover:shadow-none;
 }
 @utility btn-dark {
-  @apply btn bg-forest text-white hover:bg-forest-800;
+  @apply btn bg-forest text-white hover:bg-forest-800 hover:-translate-y-px hover:shadow-[var(--shadow-lift)] disabled:hover:translate-y-0 disabled:hover:shadow-none;
 }
 @utility btn-ghost {
   @apply btn bg-white text-ink border border-line hover:bg-brand-50;
@@ -61,6 +123,10 @@ body {
 }
 @utility card {
   @apply bg-white rounded-3xl border border-line/70 shadow-[var(--shadow-card)];
+}
+/* Add to clickable cards: they lift towards you on hover. */
+@utility card-hover {
+  @apply transition-[translate,scale,box-shadow,border-color] duration-300 ease-spring hover:-translate-y-0.5 hover:shadow-[var(--shadow-lift)];
 }
 @utility input {
   @apply w-full rounded-2xl border border-line bg-white px-4 h-12 text-[15px] text-ink placeholder:text-soft outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/15;
@@ -72,7 +138,7 @@ body {
   @apply block text-sm font-medium text-ink mb-1.5;
 }
 @utility chip {
-  @apply inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-3.5 h-9 text-[13px] font-medium text-ink hover:border-brand hover:bg-brand-50 transition;
+  @apply inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-3.5 h-9 text-[13px] font-medium text-ink hover:border-brand hover:bg-brand-50 transition ease-spring active:scale-95;
 }
 @utility display {
   font-family: var(--font-display);
@@ -89,8 +155,10 @@ body {
     transform: none;
   }
 }
+/* Lists can stagger their items: set style={{ "--i": index }} and each one starts 45ms after the last. */
 .animate-rise {
   animation: rise 0.35s ease-out both;
+  animation-delay: calc(min(var(--i, 0), 12) * 45ms);
 }
 @keyframes blink {
   0%,
@@ -116,9 +184,15 @@ body {
 .dot-typing span:nth-child(3) {
   animation-delay: 0.4s;
 }
+/* People who turn on "reduce motion" in their phone or computer settings get no movement.
+   Things still appear and change state; they just do it instantly. */
 @media (prefers-reduced-motion: reduce) {
-  .animate-rise,
-  .dot-typing span {
-    animation: none;
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
