@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { NotificationBell } from "./NotificationBell";
+import { MenuButton } from "./MenuButton";
 import { initials } from "@/lib/format";
 
 /** Page header. `greeting` shows the avatar + "Hi, name" like the home mockup. */
@@ -38,7 +39,10 @@ export function TopBar({
           <h1 className="display truncate text-2xl sm:text-3xl font-semibold">{title}</h1>
         </div>
       )}
-      <NotificationBell />
+      <div className="flex shrink-0 items-center gap-2">
+        <NotificationBell />
+        <MenuButton />
+      </div>
     </header>
   );
 }

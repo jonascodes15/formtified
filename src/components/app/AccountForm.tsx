@@ -3,7 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LogOut, Wallet } from "lucide-react";
+import { Wallet } from "lucide-react";
+import { LogoutButton } from "@/components/LogoutButton";
 
 export function AccountForm({ name: initialName, email, plan, emailNotifications }: { name: string; email: string; plan: string; emailNotifications: boolean }) {
   const router = useRouter();
@@ -36,12 +37,6 @@ export function AccountForm({ name: initialName, email, plan, emailNotifications
     const err = await patch({ currentPassword: pw.current, newPassword: pw.next });
     setPwMsg(err || "Password changed.");
     if (!err) setPw({ current: "", next: "" });
-  }
-
-  async function logout() {
-    await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/login");
-    router.refresh();
   }
 
   return (
@@ -102,10 +97,10 @@ export function AccountForm({ name: initialName, email, plan, emailNotifications
 
       <div className="card flex items-center justify-between p-5 sm:p-6 self-start">
         <div>
-          <h2 className="text-lg font-semibold">Sign out</h2>
+          <h2 className="text-lg font-semibold">Log out</h2>
           <p className="text-sm text-muted">{email}</p>
         </div>
-        <button onClick={logout} className="btn-ghost text-red-600"><LogOut className="size-4" /> Sign out</button>
+        <LogoutButton className="btn-ghost text-red-600" />
       </div>
     </div>
   );

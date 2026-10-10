@@ -9,7 +9,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     [user.id],
   );
   return (
-    <AppShell credits={user.credits} unreadResponses={Number(unread?.n ?? 0)} isAdmin={isAdmin(user.email)}>
+    <AppShell credits={user.credits} unreadResponses={Number(unread?.n ?? 0)} isAdmin={isAdmin(user.email)} name={user.name} email={user.email}>
       {children}
     </AppShell>
   );
