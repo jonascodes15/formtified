@@ -26,6 +26,12 @@
 html {
   -webkit-text-size-adjust: 100%;
 }
+/* Links like "See how it works" glide to their section. Page-to-page navigation stays instant (see layout.tsx). */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
 
 body {
   background: var(--color-canvas);

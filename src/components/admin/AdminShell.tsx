@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ArrowLeft, BadgeCheck, ChartColumn, FileText, History, LayoutDashboard, Megaphone, Menu, Users, X } from "lucide-react";
-import { LogoMark } from "@/components/Logo";
+import { LogoMark, Wordmark } from "@/components/Logo";
 import { Drawer } from "@/components/Drawer";
 import { LogoutButton } from "@/components/LogoutButton";
 import { initials } from "@/lib/format";
@@ -62,9 +62,9 @@ export function AdminShell({ children, name, email }: { children: React.ReactNod
     <div className="min-h-dvh">
       {/* Desktop sidebar: dark, so it is always clear you are in admin mode */}
       <aside className="hidden lg:flex fixed inset-y-0 left-0 w-64 flex-col overflow-y-auto bg-forest px-5 py-6 text-white">
-        <Link href="/admin" className="flex items-center gap-2">
+        <Link href="/admin" className="flex items-center gap-1.5">
           <LogoMark />
-          <span className="display text-xl font-semibold">Formtified</span>
+          <Wordmark dark />
           <span className="ml-1 rounded-full bg-lime px-2 py-0.5 text-[11px] font-semibold text-forest">Admin</span>
         </Link>
         <nav className="mt-10 flex flex-col gap-1">{navLinks()}</nav>

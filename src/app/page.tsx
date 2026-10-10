@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, Check, Download, Bell, LayoutTemplate, MessageSquareText, Share2, Sparkles, Wand2, Inbox, FileText, Search } from "lucide-react";
-import { Logo, LogoMark } from "@/components/Logo";
+import { Logo, LogoMark, Wordmark } from "@/components/Logo";
 import { LandingNav } from "@/components/landing/LandingNav";
 import { MockFormCard, MockResponseCard, MockChatCard } from "@/components/landing/Mocks";
 import { getUser } from "@/lib/auth";
@@ -16,7 +16,7 @@ export default async function Home() {
         <LandingNav signedIn={Boolean(user)} />
         <div className="relative mx-auto max-w-6xl px-5 pt-14 sm:pt-20 text-center">
           <span className="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-1.5 text-sm font-medium text-brand-700 shadow-sm">
-            <Sparkles className="size-4" /> AI onboarding forms for creators
+            AI onboarding forms for creators
           </span>
           <h1 className="display mx-auto mt-6 max-w-4xl text-[2.6rem] leading-[1.05] font-semibold text-ink sm:text-6xl lg:text-7xl">
             Know exactly what your client wants to build.
@@ -24,13 +24,15 @@ export default async function Home() {
           <p className="mx-auto mt-5 max-w-2xl text-[17px] leading-relaxed text-muted sm:text-lg">
             Describe the project to Formtified AI. It asks a few questions, then builds a ready-to-share form your client fills to narrate every feature.
           </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <div className="mx-auto mt-8 flex max-w-xs flex-col gap-3 sm:max-w-none sm:flex-row sm:justify-center">
             <Link href={user ? "/generate" : "/signup"} className="btn-dark h-12 px-7">
               Get Started <ArrowRight className="size-4" />
             </Link>
-            <a href="#how" className="btn h-12 bg-[#9aa7a1] px-7 text-white hover:bg-[#87958e]">See how it works</a>
+            <a href="#how" className="btn h-12 border border-ink/15 bg-white px-7 text-ink hover:border-ink/30 hover:bg-white/70">
+              See how it works
+            </a>
           </div>
-          <p className="mt-4 text-sm text-muted">Free to start · 20 AI credits · no card needed</p>
+          <p className="mt-4 text-sm text-muted">Free to start · no card needed</p>
 
           {/* Product mock */}
           <div className="relative mx-auto mt-14 max-w-5xl">
@@ -208,7 +210,7 @@ function DashboardMock() {
   return (
     <div className="grid overflow-hidden rounded-t-2xl bg-white text-left sm:grid-cols-[11rem_1fr]" aria-hidden="true">
       <div className="hidden bg-forest p-4 sm:block">
-        <div className="flex items-center gap-2"><LogoMark className="size-6" /><span className="display text-sm font-semibold text-white">Formtified</span></div>
+        <div className="flex items-center gap-1.5 text-white"><LogoMark className="size-6" /><Wordmark dark className="text-sm" /></div>
         <div className="mt-6 space-y-1 text-[12px]">
           {["Forms", "Generate", "Responses", "Account"].map((x, i) => (
             <div key={x} className={`rounded-lg px-3 py-2 ${i === 0 ? "bg-lime font-semibold text-forest" : "text-white/70"}`}>{x}</div>
