@@ -65,7 +65,7 @@ export function BarList({
   const max = Math.max(...items.map((i) => i.value), 1);
   return (
     <ul className="space-y-3">
-      {items.map((i) => (
+      {items.map((i, n) => (
         <li key={i.key}>
           <div className="flex items-baseline justify-between gap-3 text-sm">
             {i.href ? (
@@ -76,7 +76,7 @@ export function BarList({
             <span className="shrink-0 tabular-nums text-muted" title={`${i.value} ${valueLabel}`}>{compact(i.value)}</span>
           </div>
           <div className="mt-1.5 h-1.5 w-full">
-            <div className="h-full rounded-r-[4px] bg-brand" style={{ width: `${Math.max((i.value / max) * 100, 1.5)}%` }} />
+            <div className="h-full rounded-r-[4px] bg-brand animate-grow-x" style={{ width: `${Math.max((i.value / max) * 100, 1.5)}%`, "--i": n } as React.CSSProperties} />
           </div>
         </li>
       ))}

@@ -55,8 +55,8 @@ export function ColumnChart({ data, unit, height = 180 }: { data: { day: string;
                 className="group flex h-full flex-1 cursor-default items-end justify-center px-px outline-none"
               >
                 <div
-                  className={`w-full max-w-6 rounded-t-[4px] transition-colors ${hover === i ? "bg-brand-700" : "bg-brand"} ${d.value === 0 ? "opacity-0" : ""}`}
-                  style={{ height: `${(d.value / top) * 100}%`, minHeight: d.value > 0 ? 3 : 0 }}
+                  className={`w-full max-w-6 rounded-t-[4px] transition-colors animate-grow-y ${hover === i ? "bg-brand-700" : "bg-brand"} ${d.value === 0 ? "opacity-0" : ""}`}
+                  style={{ height: `${(d.value / top) * 100}%`, minHeight: d.value > 0 ? 3 : 0, "--i": i } as React.CSSProperties}
                 />
               </div>
             ))}

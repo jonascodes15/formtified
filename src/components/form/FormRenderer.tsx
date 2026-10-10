@@ -89,7 +89,7 @@ export function FormRenderer({
           />
           <path
             d="M20 33l8 8 16-17" fill="none" stroke="var(--color-brand)" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round"
-            pathLength={1} strokeDasharray="1" className="animate-draw [animation-delay:0.5s]"
+            pathLength={1} strokeDasharray="1" className="animate-draw" style={{ animationDelay: "0.5s" }}
           />
         </svg>
         <h2 className="display mt-4 text-3xl font-semibold animate-rise" style={{ "--i": 8 } as React.CSSProperties}>Thank you!</h2>
