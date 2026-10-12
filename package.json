@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "db:setup": "node --env-file=.env.local scripts/setup-db.mjs",
+    "user:password": "node --env-file=.env.local scripts/set-password.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
