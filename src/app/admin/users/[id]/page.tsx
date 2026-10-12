@@ -31,6 +31,7 @@ export default async function AdminUserPage({ params }: { params: Promise<{ id: 
           <div className="mt-1.5 flex flex-wrap gap-1.5">
             <PlanBadge plan={u.plan} />
             {u.suspended_at ? <Badge tone="red">Suspended {timeAgo(u.suspended_at)}</Badge> : <Badge tone="green">Active</Badge>}
+            {!u.email_verified_at && <Badge tone="amber">Email not verified</Badge>}
             {userIsAdmin && <Badge tone="dark">Admin</Badge>}
             {!u.email_notifications && <Badge>Emails off</Badge>}
           </div>
@@ -51,7 +52,7 @@ export default async function AdminUserPage({ params }: { params: Promise<{ id: 
       <div className="mt-5 grid gap-5 lg:grid-cols-2">
         <Card title="Manage account">
           <UserActions
-            user={{ id: u.id, name: u.name, email: u.email, plan: u.plan, credits: u.credits, suspended: Boolean(u.suspended_at) }}
+            user={{ id: u.id, name: u.name, email: u.email, plan: u.plan, credits: u.credits, suspended: Boolean(u.suspended_at), verified: Boolean(u.email_verified_at) }}
             locked={userIsAdmin || u.id === admin.id}
           />
         </Card>

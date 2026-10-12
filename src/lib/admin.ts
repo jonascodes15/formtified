@@ -173,6 +173,7 @@ export interface AdminUserRow {
   created_at: Date;
   last_seen_at: Date | null;
   suspended_at: Date | null;
+  email_verified_at: Date | null;
   forms: number;
   responses: number;
 }
@@ -210,7 +211,7 @@ function userWhere(f: UserFilters) {
   return { sql: where.length ? `WHERE ${where.join(" AND ")}` : "", params };
 }
 
-const USER_COLUMNS = `u.id, u.name, u.email, u.plan, u.credits, u.email_notifications, u.created_at, u.last_seen_at, u.suspended_at,
+const USER_COLUMNS = `u.id, u.name, u.email, u.plan, u.credits, u.email_notifications, u.created_at, u.last_seen_at, u.suspended_at, u.email_verified_at,
   (SELECT COUNT(*) FROM forms f WHERE f.user_id = u.id) AS forms,
   (SELECT COUNT(*) FROM responses r JOIN forms f ON f.id = r.form_id WHERE f.user_id = u.id) AS responses`;
 
@@ -308,6 +309,12 @@ export async function setSuspended(userId: number, suspended: boolean) {
     `UPDATE users SET suspended_at = ${suspended ? "now()" : "NULL"} WHERE id = $1`,
     [userId],
   );
+  return res.rowCount > 0;
+}
+
+/** For someone who can't receive the signup code: lets them in without it. */
+export async function markVerified(userId: number) {
+  const res = await execute("UPDATE users SET email_verified_at = now() WHERE id = $1 AND email_verified_at IS NULL", [userId]);
   return res.rowCount > 0;
 }
 

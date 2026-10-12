@@ -136,3 +136,29 @@ CREATE TABLE IF NOT EXISTS admin_audit (
   created_at  timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_admin_audit_created ON admin_audit (created_at);
+
+-- ---------- Email verification and password reset (added later; safe to run on an existing database) ----------
+
+-- NULL until the user enters the code emailed at signup.
+-- Adding the column with DEFAULT now() marks everyone who already has an account as verified;
+-- dropping the default straight after means new signups start unverified.
+-- Running this again changes nothing: ADD COLUMN IF NOT EXISTS skips, so the default is not re-applied.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified_at timestamptz NULL DEFAULT now();
+ALTER TABLE users ALTER COLUMN email_verified_at DROP DEFAULT;
+
+-- Goes up by one when the password is reset, which signs the account out on every other device.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS session_version integer NOT NULL DEFAULT 0;
+
+-- Signup codes and password-reset links. Only a hash is stored, never the code or link itself.
+CREATE TABLE IF NOT EXISTS auth_tokens (
+  id         integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  user_id    integer NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  purpose    varchar(12) NOT NULL,          -- 'verify' | 'reset'
+  token_hash varchar(64) NOT NULL,
+  attempts   integer NOT NULL DEFAULT 0,    -- wrong codes typed (verify only)
+  expires_at timestamptz NOT NULL,
+  used_at    timestamptz NULL,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_auth_tokens_user ON auth_tokens (user_id, purpose, created_at);
+CREATE INDEX IF NOT EXISTS idx_auth_tokens_hash ON auth_tokens (token_hash);

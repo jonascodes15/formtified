@@ -14,8 +14,9 @@ function secret() {
   return new TextEncoder().encode(s);
 }
 
-export async function createSession(userId: number) {
-  const token = await new SignJWT({ uid: userId })
+/** `version` is the user's session_version. Resetting the password raises it, which ends every older session. */
+export async function createSession(userId: number, version = 0) {
+  const token = await new SignJWT({ uid: userId, v: version })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime(`${MAX_AGE}s`)
@@ -35,27 +36,41 @@ export async function destroySession() {
   store.delete(COOKIE);
 }
 
-/** Reads the signed-in user's id from the cookie, without a database query. */
-export async function sessionUserId(): Promise<number | null> {
+async function readSession(): Promise<{ uid: number; v: number } | null> {
   const store = await cookies();
   const token = store.get(COOKIE)?.value;
   if (!token) return null;
   try {
     const { payload } = await jwtVerify(token, secret());
-    return typeof payload.uid === "number" ? payload.uid : null;
+    if (typeof payload.uid !== "number") return null;
+    // Sessions made before session_version existed have no "v"; they count as version 0.
+    return { uid: payload.uid, v: typeof payload.v === "number" ? payload.v : 0 };
   } catch {
     return null;
   }
 }
 
-export async function getUser(): Promise<SessionUser | null> {
-  const uid = await sessionUserId();
-  if (!uid) return null;
-  // A suspended user's session stops working straight away.
+/** Reads the signed-in user's id from the cookie, without a database query. */
+export async function sessionUserId(): Promise<number | null> {
+  return (await readSession())?.uid ?? null;
+}
+
+/** The signed-in user, including one who hasn't entered their email code yet (check `verified`). */
+export async function getSessionUser(): Promise<SessionUser | null> {
+  const session = await readSession();
+  if (!session) return null;
+  // A suspended user's session stops working straight away, and so does one from before a password reset.
   return queryOne<SessionUser>(
-    "SELECT id, name, email, credits, plan, email_notifications FROM users WHERE id = $1 AND suspended_at IS NULL",
-    [uid],
+    `SELECT id, name, email, credits, plan, email_notifications, email_verified_at IS NOT NULL AS verified
+     FROM users WHERE id = $1 AND suspended_at IS NULL AND session_version = $2`,
+    [session.uid, session.v],
   );
+}
+
+/** The signed-in user, only once their email is verified. */
+export async function getUser(): Promise<SessionUser | null> {
+  const user = await getSessionUser();
+  return user?.verified ? user : null;
 }
 
 /** Admins are listed by email in ADMIN_EMAILS (comma-separated). */
@@ -83,14 +98,15 @@ export async function apiAdmin(): Promise<SessionUser | null> {
   return user && isAdmin(user.email) ? user : null;
 }
 
-/** For pages: sends signed-out visitors to /login. */
+/** For pages: sends signed-out visitors to /login, and people who haven't entered their email code to /verify. */
 export async function requireUser(): Promise<SessionUser> {
-  const user = await getUser();
+  const user = await getSessionUser();
   if (!user) redirect("/login");
+  if (!user.verified) redirect("/verify");
   return user;
 }
 
-/** For API routes: returns null when signed out so the route can answer 401. */
+/** For API routes: returns null when signed out (or not yet verified) so the route can answer 401. */
 export async function apiUser(): Promise<SessionUser | null> {
   return getUser();
 }

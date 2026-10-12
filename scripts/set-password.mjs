@@ -56,9 +56,12 @@ try {
     process.exit(1);
   }
 
-  // Same hashing as signup, so the login page accepts it.
+  // Same hashing as signup, so the login page accepts it. Raising session_version signs the account out everywhere.
   const hash = await bcrypt.hash(password, 10);
-  await sql.query("UPDATE users SET password_hash = $1 WHERE id = $2", [hash, rows[0].id]);
+  await sql.query(
+    "UPDATE users SET password_hash = $1, session_version = session_version + 1 WHERE id = $2",
+    [hash, rows[0].id],
+  );
   console.log(`Password updated for ${email}. You can log in now.`);
 } catch (e) {
   console.error("Could not update the password:", e.message);

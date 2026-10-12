@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Ban, Coins, ShieldCheck, Trash2 } from "lucide-react";
+import { Ban, Coins, MailCheck, ShieldCheck, Trash2 } from "lucide-react";
 import { PLANS } from "@/lib/types";
 
 interface Target {
@@ -12,6 +12,7 @@ interface Target {
   plan: string;
   credits: number;
   suspended: boolean;
+  verified: boolean;
 }
 
 /** Credits, plan, suspend and delete controls on a user's admin page. */
@@ -67,6 +68,15 @@ export function UserActions({ user, locked }: { user: Target; locked: boolean })
     }
   }
 
+  async function verify() {
+    if (!confirm(`Mark ${user.email} as verified? ${user.name} will be able to use Formtified without entering the emailed code.`)) return;
+    const data = await call("PATCH", { action: "verify" });
+    if (data) {
+      setMsg({ ok: true, text: "Email marked as verified." });
+      router.refresh();
+    }
+  }
+
   async function remove() {
     const typed = prompt(`This permanently deletes ${user.name}'s account, forms and responses.\n\nType their email to confirm:`);
     if (typed == null) return;
@@ -100,6 +110,16 @@ export function UserActions({ user, locked }: { user: Target; locked: boolean })
           <button disabled={busy || plan === user.plan} onClick={savePlan} className="btn-dark h-12">Save</button>
         </div>
       </div>
+
+      {!user.verified && (
+        <div className="border-t border-line pt-5">
+          <p className="label flex items-center gap-2"><MailCheck className="size-4 text-muted" /> Email not verified</p>
+          <p className="mb-3 text-sm text-muted">They haven&apos;t entered the code from their signup email yet. Only do this if you know the address is theirs.</p>
+          <button disabled={busy} onClick={verify} className="btn-ghost h-11">
+            <MailCheck className="size-4" /> Mark email verified
+          </button>
+        </div>
+      )}
 
       <div className="border-t border-line pt-5">
         {locked ? (

@@ -1,13 +1,13 @@
 import { apiAdmin, isAdmin } from "@/lib/auth";
 import { fail, notFound, ok, readJson } from "@/lib/api";
-import { adjustCredits, deleteUser, getUserBasic, logAdminAction, setPlan, setSuspended } from "@/lib/admin";
+import { adjustCredits, deleteUser, getUserBasic, logAdminAction, markVerified, setPlan, setSuspended } from "@/lib/admin";
 import { PLANS } from "@/lib/types";
 
 type Ctx = { params: Promise<{ id: string }> };
 
 const forbidden = () => fail("Not found.", 404);
 
-/** Admin changes to one user: { action: "credits", delta } | { action: "plan", plan } | { action: "suspend" | "unsuspend" } */
+/** Admin changes to one user: { action: "credits", delta } | { action: "plan", plan } | { action: "suspend" | "unsuspend" | "verify" } */
 export async function PATCH(req: Request, { params }: Ctx) {
   const admin = await apiAdmin();
   if (!admin) return forbidden();
@@ -36,6 +36,11 @@ export async function PATCH(req: Request, { params }: Ctx) {
       if (suspend && (target.id === admin.id || isAdmin(target.email))) return fail("Admin accounts can't be suspended.");
       await setSuspended(target.id, suspend);
       await logAdminAction(admin, suspend ? "user.suspend" : "user.unsuspend", target.email);
+      return ok();
+    }
+    case "verify": {
+      if (!(await markVerified(target.id))) return fail("This email is already verified.");
+      await logAdminAction(admin, "user.verify", target.email);
       return ok();
     }
     default:

@@ -10,6 +10,7 @@ const ACTION_LABEL: Record<string, string> = {
   "user.plan": "Changed plan",
   "user.suspend": "Suspended user",
   "user.unsuspend": "Unsuspended user",
+  "user.verify": "Verified email",
   "user.delete": "Deleted user",
   "users.export": "Exported users",
   "form.close": "Closed form",

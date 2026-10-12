@@ -79,4 +79,5 @@ export interface SessionUser {
   credits: number;
   plan: string;
   email_notifications: boolean;
+  verified: boolean;
 }
