@@ -45,3 +45,6 @@ ca.pem
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# portfolio screenshots (kept locally, used in the portfolio repo)
+/portfolio-screenshots/
