@@ -1,4 +1,5 @@
 import "server-only";
+import { siteUrl } from "./site";
 
 /**
  * Sends email through Resend (free tier: 3,000 emails/month).
@@ -104,8 +105,4 @@ export function escapeHtml(s: string) {
   return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 }
 
-export function appUrl() {
-  if (process.env.APP_URL) return process.env.APP_URL.replace(/\/$/, "");
-  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
-  return "http://localhost:3000";
-}
+export const appUrl = siteUrl;

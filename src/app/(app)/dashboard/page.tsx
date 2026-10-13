@@ -42,7 +42,7 @@ export default async function DashboardPage() {
           </span>
         </Link>
 
-        <Link href="/templates" className="group card card-hover relative flex flex-col justify-between rounded-[2rem] p-5 sm:p-7 bg-gradient-to-br from-white to-brand-50/60 hover:border-brand/40 active:scale-[0.98]">
+        <Link href="/new" className="group card card-hover relative flex flex-col justify-between rounded-[2rem] p-5 sm:p-7 bg-gradient-to-br from-white to-brand-50/60 hover:border-brand/40 active:scale-[0.98]">
           <span className="grid size-14 sm:size-16 place-items-center rounded-full bg-brand-50">
             <FileText className="size-6 sm:size-7" strokeWidth={1.7} />
           </span>

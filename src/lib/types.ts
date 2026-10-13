@@ -30,6 +30,10 @@ export const FIELD_LABELS: Record<FieldType, string> = {
 
 export const CHOICE_TYPES: FieldType[] = ["single_choice", "multi_choice", "dropdown"];
 
+/** Groups in the template library (src/lib/templates.ts). */
+export const TEMPLATE_CATEGORIES = ["Web & apps", "Design", "Marketing", "Photo, video & events", "Business & services"] as const;
+export type TemplateCategory = (typeof TEMPLATE_CATEGORIES)[number];
+
 export interface FormField {
   id: string;
   type: FieldType;

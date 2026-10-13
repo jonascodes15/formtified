@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Lock, Mail, UserRound } from "lucide-react";
 import { AuthShell, Field, FormError } from "./AuthShell";
 
-export function AuthScreen({ initialMode }: { initialMode: "signin" | "signup" }) {
+/** `next`: where to go after signing in, e.g. "/new?template=..." from a public template page. */
+export function AuthScreen({ initialMode, next }: { initialMode: "signin" | "signup"; next?: string }) {
   const router = useRouter();
   const [mode, setMode] = useState(initialMode);
   const [name, setName] = useState("");
@@ -19,7 +20,7 @@ export function AuthScreen({ initialMode }: { initialMode: "signin" | "signup" }
   function switchMode(m: "signin" | "signup") {
     setMode(m);
     setError("");
-    window.history.replaceState(null, "", m === "signup" ? "/signup" : "/login");
+    window.history.replaceState(null, "", (m === "signup" ? "/signup" : "/login") + window.location.search);
   }
 
   async function submit(e: React.FormEvent) {
@@ -38,7 +39,8 @@ export function AuthScreen({ initialMode }: { initialMode: "signin" | "signup" }
       return;
     }
     // New and unverified accounts go to /verify to enter the emailed code first.
-    router.push(data.next || (mode === "signup" ? "/generate" : "/dashboard"));
+    if (data.next === "/verify") router.push(next ? `/verify?next=${encodeURIComponent(next)}` : "/verify");
+    else router.push(next || data.next || (mode === "signup" ? "/generate" : "/dashboard"));
     router.refresh();
   }
 
@@ -46,7 +48,13 @@ export function AuthScreen({ initialMode }: { initialMode: "signin" | "signup" }
     <AuthShell>
       <h1 className="display text-center text-3xl font-semibold">Welcome to Formtified</h1>
       <p className="mt-2 text-center text-muted">
-        {mode === "signin" ? "Sign in to see your forms and client responses." : "Create a free account. You get 20 AI credits to start."}
+        {next?.startsWith("/new?template=")
+          ? mode === "signin"
+            ? "Sign in and we'll add the template to your forms."
+            : "Create a free account and we'll add the template to your forms."
+          : mode === "signin"
+            ? "Sign in to see your forms and client responses."
+            : "Create a free account. You get 20 AI credits to start."}
       </p>
 
       <div className="mt-7 grid grid-cols-2 rounded-2xl border border-line p-1">
@@ -96,6 +104,12 @@ export function AuthScreen({ initialMode }: { initialMode: "signin" | "signup" }
         <button disabled={busy} className="btn-primary h-12 w-full rounded-2xl text-[15px]">
           {busy ? "Please wait…" : mode === "signin" ? "Sign In" : "Create account"}
         </button>
+        {mode === "signup" && (
+          <p className="text-center text-xs text-soft">
+            By creating an account you agree to the <Link href="/terms" className="underline hover:text-ink">Terms</Link> and{" "}
+            <Link href="/privacy" className="underline hover:text-ink">Privacy Policy</Link>.
+          </p>
+        )}
       </form>
     </AuthShell>
   );

@@ -25,7 +25,7 @@ const NAV = [
 ];
 
 const EXTRA = [
-  { href: "/templates", label: "Templates", icon: LayoutTemplate },
+  { href: "/new", label: "Templates", icon: LayoutTemplate },
   { href: "/credits", label: "Credits", icon: Wallet },
 ];
 

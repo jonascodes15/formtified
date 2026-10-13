@@ -1,16 +1,74 @@
 import Link from "next/link";
 import { ArrowRight, Check, Download, Bell, LayoutTemplate, MessageSquareText, Share2, Sparkles, Wand2, Inbox, FileText, Search } from "lucide-react";
-import { Logo, LogoMark, Wordmark } from "@/components/Logo";
+import { LogoMark, Wordmark } from "@/components/Logo";
 import { LandingNav } from "@/components/landing/LandingNav";
+import { SiteFooter } from "@/components/landing/SiteFooter";
+import { JsonLd } from "@/components/JsonLd";
 import { Reveal } from "@/components/Reveal";
 import { MockFormCard, MockResponseCard, MockChatCard } from "@/components/landing/Mocks";
 import { getUser } from "@/lib/auth";
+import { CONTACT_EMAIL, SITE_DESCRIPTION, SITE_NAME, siteUrl } from "@/lib/site";
+import { TEMPLATES, questionCount } from "@/lib/templates";
+
+export const metadata = {
+  alternates: { canonical: "/" },
+  openGraph: { type: "website", siteName: SITE_NAME, title: "Formtified: client onboarding forms for freelancers", description: SITE_DESCRIPTION, url: "/" },
+};
+
+const FAQS: [string, string][] = [
+  ["Is Formtified free?", "Yes. Templates, editing, sharing and unlimited responses are free. You also get 20 AI credits when you sign up; one credit creates one AI-written form."],
+  ["Does my client need an account?", "No. They open the link, fill the form and submit. Only you need an account."],
+  ["Can I send the form on WhatsApp?", "Yes. Copy your form's link and paste it into any chat. The link shows a preview with your form's title, and your client fills it on their phone."],
+  ["How is Formtified different from Google Forms?", "Google Forms is a general tool for surveys and quizzes, and you start from a blank page. Formtified is built for client briefs: the AI writes the questions for your project, the templates are made for client work, and each response arrives as a readable brief with an alert."],
+  ["Can I edit the form the AI makes?", "Yes. Change any question, add or remove questions, reorder them and change question types before or after sharing."],
+  ["What happens when I run out of credits?", "You can still use templates, build forms by hand, edit forms and collect unlimited responses. Credit packs are coming soon."],
+  ["Who is Formtified for?", "Web and app developers, designers, video editors, photographers, social media managers, event planners and any freelancer or agency that needs a clear brief from clients."],
+];
+
+// Shown on the homepage; the full list is at /templates.
+const FEATURED = [
+  "website-design-client-questionnaire",
+  "logo-design-questionnaire",
+  "mobile-app-development-questionnaire",
+  "social-media-client-onboarding-questionnaire",
+  "graphic-design-brief",
+  "wedding-photography-questionnaire",
+  "event-planning-client-questionnaire",
+  "freelance-client-intake-form",
+];
+
+function structuredData() {
+  const url = siteUrl();
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      { "@type": "Organization", "@id": `${url}/#org`, name: SITE_NAME, url, logo: `${url}/icon.svg`, email: CONTACT_EMAIL },
+      { "@type": "WebSite", "@id": `${url}/#website`, name: SITE_NAME, url, publisher: { "@id": `${url}/#org` } },
+      {
+        "@type": "SoftwareApplication",
+        name: SITE_NAME,
+        url,
+        applicationCategory: "BusinessApplication",
+        operatingSystem: "Web",
+        description: SITE_DESCRIPTION,
+        offers: { "@type": "Offer", price: "0", priceCurrency: "NGN" },
+        publisher: { "@id": `${url}/#org` },
+      },
+      {
+        "@type": "FAQPage",
+        mainEntity: FAQS.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })),
+      },
+    ],
+  };
+}
 
 export default async function Home() {
   const user = await getUser().catch(() => null);
+  const featured = FEATURED.map((k) => TEMPLATES.find((t) => t.key === k)!).filter(Boolean);
 
   return (
     <div className="bg-white">
+      <JsonLd data={structuredData()} />
       {/* Hero */}
       <section className="relative overflow-hidden bg-[#e8eeeb]">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.8),transparent_60%)]" />
@@ -18,21 +76,21 @@ export default async function Home() {
         <div className="relative mx-auto max-w-6xl px-5 pt-14 sm:pt-20 text-center">
           {/* The hero rises in piece by piece when the page loads */}
           <span className="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-1.5 text-sm font-medium text-brand-700 shadow-sm animate-rise">
-            AI onboarding forms for creators
+            Client onboarding forms for freelancers &amp; agencies
           </span>
           <h1 className="display mx-auto mt-6 max-w-4xl text-[2.6rem] leading-[1.05] font-semibold text-ink sm:text-6xl lg:text-7xl animate-rise" style={{ "--i": 1 } as React.CSSProperties}>
             Know exactly what your client wants to build.
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-[17px] leading-relaxed text-muted sm:text-lg animate-rise" style={{ "--i": 3 } as React.CSSProperties}>
-            Describe the project to Formtified AI. It asks a few questions, then builds a ready-to-share form your client fills to narrate every feature.
+            Formtified writes your client questionnaire with AI, or you start from a free template. Share one link on WhatsApp or email, and every answer lands in your dashboard, ready to quote.
           </p>
           <div className="mx-auto mt-8 flex max-w-xs flex-col gap-3 sm:max-w-none sm:flex-row sm:justify-center animate-rise" style={{ "--i": 5 } as React.CSSProperties}>
             <Link href={user ? "/generate" : "/signup"} className="btn-dark h-12 px-7">
               Get Started <ArrowRight className="size-4" />
             </Link>
-            <a href="#how" className="btn h-12 border border-ink/15 bg-white px-7 text-ink hover:border-ink/30 hover:bg-white/70">
-              See how it works
-            </a>
+            <Link href="/templates" className="btn h-12 border border-ink/15 bg-white px-7 text-ink hover:border-ink/30 hover:bg-white/70">
+              Browse free templates
+            </Link>
           </div>
           <p className="mt-4 text-sm text-muted animate-rise" style={{ "--i": 6 } as React.CSSProperties}>Free to start · no card needed</p>
 
@@ -136,7 +194,7 @@ export default async function Home() {
 
         <div className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[
-            { icon: LayoutTemplate, t: "Templates", b: "Website, app, e-commerce, branding, social media and video. Free to use." },
+            { icon: LayoutTemplate, t: `${TEMPLATES.length} templates`, b: "Web, design, marketing, photography, events and more. Free to use." },
             { icon: Bell, t: "Notifications", b: "In-app and email alerts the moment a client submits." },
             { icon: Download, t: "CSV export", b: "Open every response in Excel or Google Sheets." },
             { icon: FileText, t: "11 question types", b: "Short and long answers, choices, dropdowns, dates, links and more." },
@@ -149,6 +207,65 @@ export default async function Home() {
               </div>
             </Reveal>
           ))}
+        </div>
+      </section>
+
+      {/* Templates */}
+      <section id="templates" className="border-t border-line">
+        <div className="mx-auto max-w-6xl px-5 py-20 sm:py-28">
+          <Reveal className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="display max-w-2xl text-4xl sm:text-5xl font-semibold leading-tight">Start from a proven client questionnaire</h2>
+              <p className="mt-4 max-w-xl text-muted">
+                {TEMPLATES.length} free templates written for client work, each with a note on why every question matters. Use one as it is or edit it in seconds.
+              </p>
+            </div>
+            <Link href="/templates" className="btn-ghost h-11 shrink-0">
+              Browse all {TEMPLATES.length} <ArrowRight className="size-4" />
+            </Link>
+          </Reveal>
+          <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {featured.map((t, i) => (
+              <Reveal key={t.key} delay={i * 60}>
+                <Link href={`/templates/${t.key}`} className="card-hover group flex h-full flex-col rounded-3xl border border-line bg-white p-5">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-brand-700">{t.category}</span>
+                  <span className="mt-2 font-semibold leading-snug group-hover:underline">{t.seoTitle}</span>
+                  <span className="mt-auto pt-4 text-sm text-muted">{questionCount(t)} questions</span>
+                </Link>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Compared with Google Forms */}
+      <section className="bg-forest text-white">
+        <div className="mx-auto max-w-6xl px-5 py-20 sm:py-24">
+          <Reveal>
+            <h2 className="display max-w-2xl text-4xl sm:text-5xl font-semibold leading-tight">Why not just use Google Forms?</h2>
+            <p className="mt-4 max-w-2xl text-white/70">
+              Google Forms is great for surveys and quizzes. Formtified does one job: getting a complete brief from a client before you quote.
+            </p>
+          </Reveal>
+          <Reveal delay={120} className="mt-10 overflow-hidden rounded-3xl border border-white/10">
+            <div className="grid grid-cols-[1fr_1fr] text-sm sm:grid-cols-[1fr_1.2fr_1.2fr] sm:text-[15px]">
+              <div className="hidden bg-white/5 px-5 py-4 font-semibold sm:block" />
+              <div className="bg-white/5 px-5 py-4 font-semibold text-white/70">Google Forms</div>
+              <div className="bg-lime px-5 py-4 font-semibold text-forest">Formtified</div>
+              {[
+                ["Writing the questions", "You start from a blank page", "AI writes them from one sentence about the project, or start from a client template"],
+                ["What it's built for", "Surveys, quizzes, sign-up sheets", "Client briefs: goals, features, budget and timeline"],
+                ["When a client submits", "A new row in a spreadsheet", "A readable brief in your inbox, with an in-app and email alert"],
+                ["Guidance for you", "None", "Every template explains why each question matters"],
+              ].map(([label, them, us]) => (
+                <div key={label} className="contents">
+                  <div className="col-span-2 border-t border-white/10 px-5 pt-4 font-semibold sm:col-span-1 sm:py-4">{label}</div>
+                  <div className="border-white/10 px-5 py-3 text-white/60 sm:border-t sm:py-4">{them}</div>
+                  <div className="border-white/10 bg-white/5 px-5 py-3 sm:border-t sm:py-4">{us}</div>
+                </div>
+              ))}
+            </div>
+          </Reveal>
         </div>
       </section>
 
@@ -190,12 +307,7 @@ export default async function Home() {
           <h2 className="display text-center text-4xl font-semibold">Questions</h2>
         </Reveal>
         <Reveal delay={100} className="mt-10 divide-y divide-line border-y border-line">
-          {[
-            ["Does my client need an account?", "No. They open the link, fill the form and submit. Only you need an account."],
-            ["Can I edit the form the AI makes?", "Yes. Change any question, add or remove questions, reorder them and change question types before or after sharing."],
-            ["What happens when I run out of credits?", "You can still use templates, build forms by hand, edit forms and collect unlimited responses. Credit packs are coming soon."],
-            ["Who is Formtified for?", "Web and app developers, designers, video editors, social media managers and any creator who needs a clear brief from clients."],
-          ].map(([q, a]) => (
+          {FAQS.map(([q, a]) => (
             <details key={q} className="group py-5">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-lg font-semibold">
                 {q}
@@ -208,19 +320,16 @@ export default async function Home() {
         </Reveal>
       </section>
 
-      {/* CTA + footer */}
-      <section className="px-5 pb-10">
+      {/* Closing call to action */}
+      <section className="px-5 pb-16">
         <Reveal from="scale" className="mx-auto max-w-6xl rounded-[2rem] bg-brand px-6 py-14 text-center text-white sm:px-12">
           <h2 className="display mx-auto max-w-2xl text-4xl sm:text-5xl font-semibold leading-tight">Your next client brief is one link away.</h2>
           <Link href={user ? "/generate" : "/signup"} className="btn mt-8 h-12 bg-white px-7 text-forest hover:bg-lime">
             Create your first form <ArrowRight className="size-4" />
           </Link>
         </Reveal>
-        <footer className="mx-auto mt-10 flex max-w-6xl flex-col items-center justify-between gap-4 text-sm text-muted sm:flex-row">
-          <Logo />
-          <p>© {new Date().getFullYear()} Formtified. Built in Lagos.</p>
-        </footer>
       </section>
+      <SiteFooter />
     </div>
   );
 }

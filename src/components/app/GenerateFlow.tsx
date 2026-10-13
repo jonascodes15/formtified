@@ -145,7 +145,7 @@ export function GenerateFlow({ credits: initialCredits }: { credits: number }) {
           {noCredits && (
             <p className="mt-3 rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-800">
               You are out of credits. <Link href="/credits" className="font-semibold underline">Get more credits</Link> or{" "}
-              <Link href="/templates" className="font-semibold underline">start from a free template</Link>.
+              <Link href="/new" className="font-semibold underline">start from a free template</Link>.
             </p>
           )}
           {error && <p className="mt-3 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}

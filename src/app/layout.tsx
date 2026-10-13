@@ -1,11 +1,22 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { VisitTracker } from "@/components/VisitTracker";
+import { SITE_DESCRIPTION, SITE_NAME, siteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: { default: "Formtified: AI client onboarding forms", template: "%s · Formtified" },
-  description:
-    "Describe your client's project, answer a few questions, and get a ready-to-share onboarding form in seconds.",
+  // Lets every page use short paths ("/templates") for links and images; Next.js adds the domain.
+  metadataBase: new URL(siteUrl()),
+  title: { default: "Client Onboarding Forms for Freelancers | Formtified", template: "%s · Formtified" },
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    locale: "en_NG",
+    title: "Formtified: client onboarding forms for freelancers",
+    description: SITE_DESCRIPTION,
+  },
+  twitter: { card: "summary_large_image" },
 };
 
 export const viewport: Viewport = {

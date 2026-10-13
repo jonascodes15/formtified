@@ -9,9 +9,15 @@ type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const form = await getFormBySlug((await params).slug);
-  return form
-    ? { title: form.title, description: form.description ?? `Onboarding form from ${form.owner_name}`, robots: { index: false } }
-    : { title: "Form not found" };
+  if (!form) return { title: "Form not found", robots: { index: false } };
+  // Clients' forms stay out of Google, but get a proper preview when the link is shared on WhatsApp and elsewhere.
+  const description = form.description?.slice(0, 200) || `Onboarding form from ${form.owner_name}. Takes a few minutes, no account needed.`;
+  return {
+    title: { absolute: form.title },
+    description,
+    robots: { index: false },
+    openGraph: { type: "website", title: form.title, description, url: `/f/${form.slug}`, siteName: "Formtified" },
+  };
 }
 
 export default async function PublicFormPage({ params }: Props) {

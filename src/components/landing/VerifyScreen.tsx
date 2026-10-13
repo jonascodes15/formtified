@@ -8,7 +8,7 @@ import { AuthShell, FormError } from "./AuthShell";
 const COOLDOWN = 45; // seconds, matches the server's limit
 
 /** Enter the 6-digit code emailed at signup. */
-export function VerifyScreen({ email }: { email: string }) {
+export function VerifyScreen({ email, next }: { email: string; next?: string }) {
   const router = useRouter();
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
@@ -41,7 +41,7 @@ export function VerifyScreen({ email }: { email: string }) {
       input.current?.focus();
       return;
     }
-    router.push(data.next || "/dashboard");
+    router.push(next || data.next || "/dashboard");
     router.refresh();
   }
 
@@ -62,7 +62,7 @@ export function VerifyScreen({ email }: { email: string }) {
     setBusy(false);
     if (!res.ok) return setError(data.error || "Something went wrong.");
     if (data.next) {
-      router.push(data.next);
+      router.push(next || data.next);
       return;
     }
     setNotice(`A new code is on its way to ${email}.`);
@@ -73,7 +73,7 @@ export function VerifyScreen({ email }: { email: string }) {
 
   async function differentEmail() {
     await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/signup");
+    router.push(next ? `/signup?next=${encodeURIComponent(next)}` : "/signup");
     router.refresh();
   }
 

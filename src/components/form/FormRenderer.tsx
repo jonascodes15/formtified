@@ -13,6 +13,7 @@ export function FormRenderer({
   slug,
   preview,
   ownerName,
+  titleAs: Title = "h1",
 }: {
   title: string;
   description?: string | null;
@@ -20,6 +21,8 @@ export function FormRenderer({
   slug?: string;
   preview?: boolean;
   ownerName?: string;
+  /** "h2" when the form is shown inside another page that already has its own main heading. */
+  titleAs?: "h1" | "h2";
 }) {
   const [values, setValues] = useState<Record<string, Value>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -114,7 +117,7 @@ export function FormRenderer({
 
   return (
     <form onSubmit={submit} noValidate>
-      <h1 className="display text-3xl sm:text-4xl font-semibold leading-tight">{title}</h1>
+      <Title className="display text-3xl sm:text-4xl font-semibold leading-tight">{title}</Title>
       {description && <p className="mt-3 text-[16px] leading-relaxed text-muted whitespace-pre-wrap">{description}</p>}
       <p className="mt-3 text-sm text-soft"><span className="text-red-500">*</span> Required</p>
 
