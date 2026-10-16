@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LegalPage } from "@/components/landing/LegalPage";
-import { CONTACT_EMAIL } from "@/lib/site";
+import { COMPANY, CONTACT_EMAIL } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
@@ -12,10 +12,18 @@ export const metadata: Metadata = {
 export default function PrivacyPage() {
   const mail = <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>;
   return (
-    <LegalPage title="Privacy Policy" updated="12 October 2026">
+    <LegalPage title="Privacy Policy" updated="16 October 2026">
       <p>
-        This policy explains what information Formtified collects, why, and what you can do about it. Formtified is run from Lagos, Nigeria. If you have
-        any question about your data, email {mail}.
+        This policy explains what information Formtified collects, why, and what you can do about it. If you have any question about your data, email{" "}
+        {mail}.
+      </p>
+
+      <h2>Who we are</h2>
+      <p>
+        Formtified is built and run by <strong>{COMPANY.name}</strong> ({COMPANY.rc}), a company registered in Nigeria and based in {COMPANY.location}.
+        In this policy, &ldquo;we&rdquo;, &ldquo;us&rdquo; and &ldquo;our&rdquo; mean {COMPANY.name}. We are responsible for (the &ldquo;data
+        controller&rdquo; of) the personal data in your account. For your clients&apos; responses, you decide what is collected and we process it on your
+        behalf.
       </p>
 
       <h2>What we collect</h2>
@@ -86,7 +94,8 @@ export default function PrivacyPage() {
       <h2>Your rights</h2>
       <p>
         Under Nigeria&apos;s Data Protection Act and similar laws elsewhere, you can ask to see, correct, export or delete your personal data, or object
-        to how we use it. Email {mail} and we&apos;ll respond within 30 days.
+        to how we use it. Email {mail} and we&apos;ll respond within 30 days. If you&apos;re not happy with our answer, you can complain to the Nigeria
+        Data Protection Commission.
       </p>
 
       <h2>Children</h2>
@@ -96,6 +105,11 @@ export default function PrivacyPage() {
       <p>
         If we change this policy, we&apos;ll update the date at the top, and tell you by email or in the app if the change is significant. See also
         our <Link href="/terms">Terms of Service</Link>.
+      </p>
+
+      <h2>Contact</h2>
+      <p>
+        {COMPANY.name}, {COMPANY.location}. Email {mail}.
       </p>
     </LegalPage>
   );

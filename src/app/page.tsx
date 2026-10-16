@@ -7,7 +7,7 @@ import { JsonLd } from "@/components/JsonLd";
 import { Reveal } from "@/components/Reveal";
 import { MockFormCard, MockResponseCard, MockChatCard } from "@/components/landing/Mocks";
 import { getUser } from "@/lib/auth";
-import { CONTACT_EMAIL, SITE_DESCRIPTION, SITE_NAME, siteUrl } from "@/lib/site";
+import { COMPANY, CONTACT_EMAIL, FOUNDER, SITE_DESCRIPTION, SITE_NAME, siteUrl } from "@/lib/site";
 import { TEMPLATES, questionCount } from "@/lib/templates";
 
 export const metadata = {
@@ -42,7 +42,16 @@ function structuredData() {
   return {
     "@context": "https://schema.org",
     "@graph": [
-      { "@type": "Organization", "@id": `${url}/#org`, name: SITE_NAME, url, logo: `${url}/icon.svg`, email: CONTACT_EMAIL },
+      {
+        "@type": "Organization",
+        "@id": `${url}/#org`,
+        name: SITE_NAME,
+        url,
+        logo: `${url}/icon.svg`,
+        email: CONTACT_EMAIL,
+        parentOrganization: { "@type": "Organization", name: COMPANY.name, legalName: COMPANY.name, url: COMPANY.url },
+        founder: { "@type": "Person", name: FOUNDER.name, url: FOUNDER.portfolio, sameAs: [FOUNDER.portfolio, FOUNDER.linkedin] },
+      },
       { "@type": "WebSite", "@id": `${url}/#website`, name: SITE_NAME, url, publisher: { "@id": `${url}/#org` } },
       {
         "@type": "SoftwareApplication",

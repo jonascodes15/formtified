@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LegalPage } from "@/components/landing/LegalPage";
-import { CONTACT_EMAIL } from "@/lib/site";
+import { COMPANY, CONTACT_EMAIL } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
@@ -12,10 +12,14 @@ export const metadata: Metadata = {
 export default function TermsPage() {
   const mail = <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>;
   return (
-    <LegalPage title="Terms of Service" updated="12 October 2026">
+    <LegalPage title="Terms of Service" updated="16 October 2026">
       <p>
-        These terms are the agreement between you and Formtified when you use the website and app. By creating an account or using Formtified, you agree to
-        them. If you don&apos;t agree, please don&apos;t use Formtified.
+        Formtified is built and run by <strong>{COMPANY.name}</strong> ({COMPANY.rc}), a company registered in Nigeria and based in {COMPANY.location}.
+        In these terms, &ldquo;we&rdquo;, &ldquo;us&rdquo; and &ldquo;our&rdquo; mean {COMPANY.name}.
+      </p>
+      <p>
+        These terms are the agreement between you and {COMPANY.name} when you use the Formtified website and app. By creating an account or using
+        Formtified, you agree to them. If you don&apos;t agree, please don&apos;t use Formtified.
       </p>
 
       <h2>Your account</h2>
@@ -27,7 +31,7 @@ export default function TermsPage() {
 
       <h2>Your content</h2>
       <p>
-        Your forms and the responses your clients send belong to you. You give Formtified permission to store, display and process them only as needed to
+        Your forms and the responses your clients send belong to you. You give us permission to store, display and process them only as needed to
         run the service for you, for example to show a form to your clients and deliver their answers to you.
       </p>
       <p>You are responsible for what your forms ask and for how you use your clients&apos; answers, including following the privacy laws that apply to you.</p>
@@ -62,7 +66,7 @@ export default function TermsPage() {
 
       <h2>Liability</h2>
       <p>
-        As far as the law allows, Formtified is not liable for indirect losses, such as lost profits or lost clients, from using or not being able to use the
+        As far as the law allows, {COMPANY.name} is not liable for indirect losses, such as lost profits or lost clients, from using or not being able to use the
         service. Our total liability to you is limited to the amount you paid us in the 12 months before the claim.
       </p>
 
@@ -74,7 +78,13 @@ export default function TermsPage() {
       <h2>Changes and law</h2>
       <p>
         We may update these terms. We&apos;ll change the date at the top and tell you about significant changes. These terms are governed by the laws of
-        Nigeria. Our <Link href="/privacy">Privacy Policy</Link> explains how we handle personal data.
+        the Federal Republic of Nigeria, and the courts of Lagos State will deal with any dispute we can&apos;t settle together. Our{" "}
+        <Link href="/privacy">Privacy Policy</Link> explains how we handle personal data.
+      </p>
+
+      <h2>Contact</h2>
+      <p>
+        {COMPANY.name}, {COMPANY.location}. Email {mail}.
       </p>
     </LegalPage>
   );

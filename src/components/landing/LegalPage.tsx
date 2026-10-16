@@ -1,3 +1,5 @@
+import { COMPANY } from "@/lib/site";
+import { CompanyLine } from "./CompanyLine";
 import { PublicShell } from "./PublicShell";
 
 /** Layout for the privacy policy and terms: a heading, the date, and readable text. */
@@ -17,6 +19,10 @@ export function LegalPage({ title, updated, children }: { title: string; updated
           [&_a]:font-medium [&_a]:text-brand-700 [&_a]:underline [&_strong]:text-ink"
       >
         {children}
+        <div className="mt-12 rounded-2xl bg-canvas p-5 text-sm text-muted">
+          <strong>Formtified is built and run by {COMPANY.name}.</strong>
+          <CompanyLine className="!mt-1" />
+        </div>
       </article>
     </PublicShell>
   );

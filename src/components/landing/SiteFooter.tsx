@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
+import { CompanyLine } from "./CompanyLine";
 import { CONTACT_EMAIL } from "@/lib/site";
 import { TEMPLATES } from "@/lib/templates";
 
@@ -18,7 +19,7 @@ export function SiteFooter() {
   const columns: [string, [string, string][]][] = [
     ["Product", [["Features", "/#features"], ["How it works", "/#how"], ["Pricing", "/#pricing"], ["FAQ", "/#faq"], ["Create a free account", "/signup"]]],
     ["Templates", [...popular.map((t): [string, string] => [t.seoTitle, `/templates/${t.key}`]), ["All templates →", "/templates"]]],
-    ["Company", [["Privacy policy", "/privacy"], ["Terms of service", "/terms"], ["Contact us", `mailto:${CONTACT_EMAIL}`]]],
+    ["Company", [["About us", "/about"], ["Privacy policy", "/privacy"], ["Terms of service", "/terms"], ["Contact us", `mailto:${CONTACT_EMAIL}`]]],
   ];
 
   return (
@@ -44,7 +45,10 @@ export function SiteFooter() {
         ))}
       </div>
       <div className="border-t border-line">
-        <p className="mx-auto max-w-6xl px-5 py-6 text-sm text-muted">© {new Date().getFullYear()} Formtified. Built in Lagos.</p>
+        <div className="mx-auto flex max-w-6xl flex-col gap-2 px-5 py-6 text-sm text-muted md:flex-row md:justify-between">
+          <p>© {new Date().getFullYear()} Formtified. All rights reserved.</p>
+          <CompanyLine className="text-soft" />
+        </div>
       </div>
     </footer>
   );

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Logo, LogoMark } from "@/components/Logo";
+import { COMPANY } from "@/lib/site";
 import { MockFormCard, MockResponseCard, MockChatCard } from "./Mocks";
 
 const SLIDES = [
@@ -28,7 +29,7 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
           <Logo />
           <div className="mx-auto my-auto w-full max-w-sm py-10">{children}</div>
           <p className="text-center text-xs text-soft">
-            © {new Date().getFullYear()} Formtified. All rights reserved. ·{" "}
+            © {new Date().getFullYear()} {COMPANY.name}. All rights reserved. ·{" "}
             <Link href="/#faq" className="text-brand-700 hover:underline">Help</Link>
           </p>
         </div>
