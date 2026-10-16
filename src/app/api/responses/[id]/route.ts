@@ -1,5 +1,6 @@
 import { apiUser } from "@/lib/auth";
-import { execute } from "@/lib/db";
+import { execute, queryOne } from "@/lib/db";
+import { deleteStoredFiles } from "@/lib/uploads";
 import { notFound, ok, unauthorized } from "@/lib/api";
 
 type Ctx = { params: Promise<{ id: string }> };
@@ -17,7 +18,10 @@ export async function PATCH(_req: Request, { params }: Ctx) {
 export async function DELETE(_req: Request, { params }: Ctx) {
   const user = await apiUser();
   if (!user) return unauthorized();
-  const res = await execute(`DELETE FROM responses WHERE ${OWNED}`, [Number((await params).id), user.id]);
-  if (!res.rowCount) return notFound();
+  const id = Number((await params).id);
+  const owned = await queryOne(`SELECT id FROM responses WHERE ${OWNED}`, [id, user.id]);
+  if (!owned) return notFound();
+  await deleteStoredFiles({ responseId: id });
+  await execute("DELETE FROM responses WHERE id = $1", [id]);
   return ok();
 }

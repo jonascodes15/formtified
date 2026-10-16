@@ -10,6 +10,7 @@ export const FIELD_TYPES = [
   "single_choice",
   "multi_choice",
   "dropdown",
+  "file",
 ] as const;
 
 export type FieldType = (typeof FIELD_TYPES)[number];
@@ -26,6 +27,7 @@ export const FIELD_LABELS: Record<FieldType, string> = {
   single_choice: "Multiple choice (one)",
   multi_choice: "Checkboxes (many)",
   dropdown: "Dropdown",
+  file: "File upload",
 };
 
 export const CHOICE_TYPES: FieldType[] = ["single_choice", "multi_choice", "dropdown"];
@@ -70,6 +72,18 @@ export interface ResponseRecord {
   is_read: boolean;
   created_at: Date;
   form_title?: string;
+}
+
+/** The AI's one-page brief of a client's response. Empty strings/lists mean the client didn't say. */
+export interface BriefSummary {
+  overview: string;
+  goals: string[];
+  scope: string[];
+  budget: string;
+  timeline: string;
+  notes: string[];
+  risks: string[];
+  missing: string[];
 }
 
 /** Plan names. Everything except "free" counts as a paying subscriber in the admin dashboard. */

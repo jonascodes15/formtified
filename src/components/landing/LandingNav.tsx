@@ -11,7 +11,7 @@ const LINKS = [
   ["How it works", "/#how"],
   ["Templates", "/templates"],
   ["Pricing", "/#pricing"],
-  ["FAQ", "/#faq"],
+  ["Help", "/docs"],
 ];
 
 export function LandingNav({ signedIn = false }: { signedIn?: boolean }) {

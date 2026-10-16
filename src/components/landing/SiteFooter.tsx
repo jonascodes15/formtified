@@ -17,7 +17,7 @@ const POPULAR = [
 export function SiteFooter() {
   const popular = POPULAR.map((k) => TEMPLATES.find((t) => t.key === k)!).filter(Boolean);
   const columns: [string, [string, string][]][] = [
-    ["Product", [["Features", "/#features"], ["How it works", "/#how"], ["Pricing", "/#pricing"], ["FAQ", "/#faq"], ["Create a free account", "/signup"]]],
+    ["Product", [["Features", "/#features"], ["How it works", "/#how"], ["Pricing", "/#pricing"], ["FAQ", "/#faq"], ["Help Center", "/docs"], ["Create a free account", "/signup"]]],
     ["Templates", [...popular.map((t): [string, string] => [t.seoTitle, `/templates/${t.key}`]), ["All templates →", "/templates"]]],
     ["Company", [["About us", "/about"], ["Privacy policy", "/privacy"], ["Terms of service", "/terms"], ["Contact us", `mailto:${CONTACT_EMAIL}`]]],
   ];

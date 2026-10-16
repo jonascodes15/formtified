@@ -144,6 +144,46 @@ body {
   font-family: var(--font-display);
   letter-spacing: -0.01em;
 }
+/* Help articles (/docs): readable text, numbered steps and tip boxes. */
+@utility prose-docs {
+  @apply text-[16px] leading-relaxed text-ink/85;
+  & > * + * {
+    @apply mt-4;
+  }
+  & h2 {
+    @apply display mt-10 text-2xl font-semibold text-ink;
+  }
+  & ul {
+    @apply list-disc space-y-2 pl-6;
+  }
+  & a {
+    @apply font-medium text-brand-700 underline;
+  }
+  & strong {
+    @apply text-ink;
+  }
+  & code {
+    @apply rounded-md bg-canvas px-1.5 py-0.5 text-[14px];
+  }
+  & em {
+    @apply font-medium not-italic text-ink;
+  }
+  & .steps {
+    counter-reset: step;
+    @apply space-y-3;
+  }
+  & .steps > li {
+    counter-increment: step;
+    @apply relative pl-10;
+  }
+  & .steps > li::before {
+    content: counter(step);
+    @apply absolute left-0 top-0 grid size-7 place-items-center rounded-full bg-brand-50 text-sm font-semibold text-brand-700;
+  }
+  & .tip {
+    @apply rounded-2xl border border-brand/20 bg-brand-50/60 px-4 py-3 text-[15px];
+  }
+}
 
 @keyframes rise {
   from {

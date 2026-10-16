@@ -1,5 +1,11 @@
 import Link from "next/link";
-import { ArrowRight, Check, Download, Bell, LayoutTemplate, MessageSquareText, Share2, Sparkles, Wand2, Inbox, FileText, Search } from "lucide-react";
+import {
+  AlertTriangle, ArrowRight, Check, ClipboardList, Download, Bell, FileDown, HelpCircle, LayoutTemplate, MessageSquareText, Paperclip, Share2, Sparkles,
+  Wallet, Wand2, Inbox, FileText, Search,
+} from "lucide-react";
+import { FIELD_TYPES } from "@/lib/types";
+import { UPLOAD_MAX_FILES, UPLOAD_MAX_MB } from "@/lib/files";
+import { FORM_COST, PACKS, SUMMARY_COST, naira } from "@/lib/credits";
 import { LogoMark, Wordmark } from "@/components/Logo";
 import { LandingNav } from "@/components/landing/LandingNav";
 import { SiteFooter } from "@/components/landing/SiteFooter";
@@ -16,12 +22,14 @@ export const metadata = {
 };
 
 const FAQS: [string, string][] = [
-  ["Is Formtified free?", "Yes. Templates, editing, sharing and unlimited responses are free. You also get 20 AI credits when you sign up; one credit creates one AI-written form."],
+  ["Is Formtified free?", "Yes. Templates, editing, sharing, file uploads and unlimited responses are free. You also get 20 AI credits when you sign up: one credit writes a form with AI, and one credit turns a response into an AI brief."],
   ["Does my client need an account?", "No. They open the link, fill the form and submit. Only you need an account."],
   ["Can I send the form on WhatsApp?", "Yes. Copy your form's link and paste it into any chat. The link shows a preview with your form's title, and your client fills it on their phone."],
   ["How is Formtified different from Google Forms?", "Google Forms is a general tool for surveys and quizzes, and you start from a blank page. Formtified is built for client briefs: the AI writes the questions for your project, the templates are made for client work, and each response arrives as a readable brief with an alert."],
   ["Can I edit the form the AI makes?", "Yes. Change any question, add or remove questions, reorder them and change question types before or after sharing."],
-  ["What happens when I run out of credits?", "You can still use templates, build forms by hand, edit forms and collect unlimited responses. Credit packs are coming soon."],
+  ["Can clients send me files?", `Yes. Add a File upload question and clients can attach logos, photos, documents, audio and video, up to ${UPLOAD_MAX_FILES} files of ${UPLOAD_MAX_MB} MB each per question. They don't need an account, and only you can open the files.`],
+  ["What is the AI brief?", "One tap turns a client's response into a one-page brief: an overview, scope, budget, timeline, risks and the questions to ask before you quote. You can send the questions on WhatsApp or download the brief as a PDF."],
+  ["What happens when I run out of credits?", "You can still use templates, build forms by hand, edit forms and collect unlimited responses. To use AI again, buy a credit pack in Naira with card, bank transfer or USSD through Paystack."],
   ["Who is Formtified for?", "Web and app developers, designers, video editors, photographers, social media managers, event planners and any freelancer or agency that needs a clear brief from clients."],
 ];
 
@@ -60,7 +68,10 @@ function structuredData() {
         applicationCategory: "BusinessApplication",
         operatingSystem: "Web",
         description: SITE_DESCRIPTION,
-        offers: { "@type": "Offer", price: "0", priceCurrency: "NGN" },
+        offers: [
+          { "@type": "Offer", name: "Free", price: "0", priceCurrency: "NGN" },
+          ...PACKS.map((p) => ({ "@type": "Offer", name: `${p.name}: ${p.credits} AI credits`, price: String(p.naira), priceCurrency: "NGN" })),
+        ],
         publisher: { "@id": `${url}/#org` },
       },
       {
@@ -131,8 +142,11 @@ export default async function Home() {
             { icon: Wand2, tint: "bg-lime", title: "AI-built forms", body: "Describe the project in a sentence. The AI asks up to 4 quick questions, then writes the whole form in seconds." },
             { icon: Share2, tint: "bg-[#e3dbf7]", title: "Share one link", body: "Send it on WhatsApp, email or DM. Clients fill it on any phone, no account needed." },
             { icon: Inbox, tint: "bg-[#efe6d2]", title: "Answers in your account", body: "Every response lands in your dashboard with an in-app and email alert. Export to CSV any time." },
+            { icon: Paperclip, tint: "bg-[#d9ecf2]", title: "Clients attach files", body: `Logos, photos, documents and voice notes come in with the answers. Up to ${UPLOAD_MAX_FILES} files per question, private to you.` },
+            { icon: ClipboardList, tint: "bg-lime", title: "AI brief of every response", body: "Turn a long response into one page: goals, scope, budget, timeline, risks and what to ask before you quote." },
+            { icon: Wallet, tint: "bg-[#e3dbf7]", title: "Pay in Naira", body: "Free to start. Top up AI credits with card, bank transfer or USSD through Paystack. Credits never expire." },
           ].map((f, i) => (
-            <Reveal key={f.title} delay={i * 110}>
+            <Reveal key={f.title} delay={(i % 3) * 110}>
               <div className="card-hover h-full rounded-3xl border border-line bg-canvas/60 p-7">
                 <span className={`grid size-12 place-items-center rounded-2xl ${f.tint}`}><f.icon className="size-5 text-ink" /></span>
                 <h3 className="mt-6 text-xl font-semibold">{f.title}</h3>
@@ -174,6 +188,42 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* AI brief */}
+      <section id="brief" className="mx-auto max-w-6xl px-5 pt-20 sm:pt-28">
+        <div className="grid items-center gap-12 lg:grid-cols-2">
+          <Reveal from="left">
+            <span className="inline-flex items-center gap-2 rounded-full bg-lime px-3 py-1 text-xs font-semibold text-forest">
+              <Sparkles className="size-3.5" /> New
+            </span>
+            <h2 className="display mt-4 text-4xl sm:text-5xl font-semibold leading-tight">From a long response to a brief you can quote from</h2>
+            <p className="mt-4 max-w-lg leading-relaxed text-muted">
+              One tap turns your client&apos;s answers into a single page: what they want, the full scope, budget and timeline, the risks, and the
+              questions to ask before you send a price.
+            </p>
+            <ul className="mt-6 space-y-3 text-[15px]">
+              {[
+                [HelpCircle, "Follow-up questions ready to send on WhatsApp"],
+                [AlertTriangle, "Spots risks like a big scope on a short deadline"],
+                [FileDown, "Download it as a PDF to share or keep"],
+                [Paperclip, "Files your client attached, right next to their answers"],
+              ].map(([Icon, text]) => {
+                const I = Icon as typeof Sparkles;
+                return (
+                  <li key={text as string} className="flex gap-3">
+                    <span className="grid size-8 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-700"><I className="size-4" /></span>
+                    <span className="pt-1">{text as string}</span>
+                  </li>
+                );
+              })}
+            </ul>
+            <p className="mt-6 text-sm text-muted">{SUMMARY_COST} credit per brief. <Link href="/docs/ai-brief-summary" className="text-brand-700 underline">How it works</Link></p>
+          </Reveal>
+          <Reveal from="right" delay={120}>
+            <BriefMock />
+          </Reveal>
+        </div>
+      </section>
+
       {/* How it works */}
       <section id="how" className="mx-auto max-w-6xl px-5 py-20 sm:py-28">
         <div className="grid gap-10 lg:grid-cols-[1fr_2fr] lg:items-end">
@@ -206,7 +256,7 @@ export default async function Home() {
             { icon: LayoutTemplate, t: `${TEMPLATES.length} templates`, b: "Web, design, marketing, photography, events and more. Free to use." },
             { icon: Bell, t: "Notifications", b: "In-app and email alerts the moment a client submits." },
             { icon: Download, t: "CSV export", b: "Open every response in Excel or Google Sheets." },
-            { icon: FileText, t: "11 question types", b: "Short and long answers, choices, dropdowns, dates, links and more." },
+            { icon: FileText, t: `${FIELD_TYPES.length} question types`, b: "Short and long answers, choices, dropdowns, dates, links and file uploads." },
           ].map((f, i) => (
             <Reveal key={f.t} delay={i * 90}>
               <div className="card-hover h-full rounded-3xl border border-line bg-white p-6">
@@ -264,7 +314,8 @@ export default async function Home() {
               {[
                 ["Writing the questions", "You start from a blank page", "AI writes them from one sentence about the project, or start from a client template"],
                 ["What it's built for", "Surveys, quizzes, sign-up sheets", "Client briefs: goals, features, budget and timeline"],
-                ["When a client submits", "A new row in a spreadsheet", "A readable brief in your inbox, with an in-app and email alert"],
+                ["When a client submits", "A new row in a spreadsheet", "A readable response with an alert, and a one-page AI brief with follow-up questions"],
+                ["Files from clients", "Clients must sign in to Google to upload", "Logos, photos and voice notes, no account needed"],
                 ["Guidance for you", "None", "Every template explains why each question matters"],
               ].map(([label, them, us]) => (
                 <div key={label} className="contents">
@@ -283,14 +334,16 @@ export default async function Home() {
         <div className="mx-auto max-w-6xl px-5 py-20 sm:py-28">
           <Reveal>
             <h2 className="display text-center text-4xl sm:text-5xl font-semibold">Simple pricing</h2>
-            <p className="mt-3 text-center text-muted">One credit generates one AI form. Everything else is free.</p>
+            <p className="mt-3 text-center text-muted">
+              Start free. Buy AI credits only when you need them: {FORM_COST} credit writes a form, {SUMMARY_COST} credit summarises a response.
+            </p>
           </Reveal>
-          <div className="mx-auto mt-12 grid max-w-4xl gap-5 md:grid-cols-2">
+          <div className="mx-auto mt-12 grid max-w-5xl gap-5 lg:grid-cols-[1fr_1.4fr]">
             <Reveal className="h-full rounded-3xl border border-line bg-white p-8">
               <p className="font-semibold text-brand-700">Free</p>
               <p className="display mt-2 text-5xl font-semibold">₦0</p>
               <ul className="mt-6 space-y-3 text-[15px]">
-                {["20 AI credits when you sign up", "Unlimited forms from templates", "Unlimited responses", "CSV export and email alerts"].map((x) => (
+                {["20 AI credits when you sign up", "Unlimited forms from templates", "Unlimited responses and file uploads", "CSV export and email alerts"].map((x) => (
                   <li key={x} className="flex gap-2"><Check className="mt-0.5 size-5 shrink-0 text-brand" /> {x}</li>
                 ))}
               </ul>
@@ -298,13 +351,18 @@ export default async function Home() {
             </Reveal>
             <Reveal delay={140} className="h-full rounded-3xl bg-forest p-8 text-white">
               <p className="font-semibold text-lime">Credit packs</p>
-              <p className="display mt-2 text-5xl font-semibold">Soon</p>
-              <ul className="mt-6 space-y-3 text-[15px] text-white/85">
-                {["Top up AI credits when you need more", "Credits never expire", "Pay in Naira", "Everything in Free"].map((x) => (
-                  <li key={x} className="flex gap-2"><Check className="mt-0.5 size-5 shrink-0 text-lime" /> {x}</li>
+              <p className="mt-2 text-white/70">Top up any time. Credits never expire.</p>
+              <ul className="mt-6 grid gap-3 sm:grid-cols-3">
+                {PACKS.map((p) => (
+                  <li key={p.id} className={`rounded-2xl p-4 ${p.featured ? "bg-lime text-forest" : "bg-white/10"}`}>
+                    <p className="text-sm font-semibold">{p.name}</p>
+                    <p className="display mt-1 text-3xl font-semibold">{naira(p.naira)}</p>
+                    <p className={`mt-1 text-sm ${p.featured ? "text-forest/75" : "text-white/70"}`}>{p.credits} credits</p>
+                  </li>
                 ))}
               </ul>
-              <button disabled className="btn mt-8 w-full bg-white/10 text-white">Coming soon</button>
+              <p className="mt-5 flex items-center gap-2 text-sm text-white/70"><Wallet className="size-4" /> Pay with card, bank transfer or USSD through Paystack.</p>
+              <Link href={user ? "/credits" : "/signup?next=%2Fcredits"} className="btn mt-6 w-full bg-white text-forest hover:bg-lime">Buy credits</Link>
             </Reveal>
           </div>
         </div>
@@ -339,6 +397,52 @@ export default async function Home() {
         </Reveal>
       </section>
       <SiteFooter />
+    </div>
+  );
+}
+
+/** A sample AI brief, as it appears on a response. */
+function BriefMock() {
+  return (
+    <div className="relative" aria-hidden="true">
+      <div className="absolute -inset-4 -z-10 rounded-[2.5rem] bg-[radial-gradient(ellipse_at_center,rgba(201,239,107,0.35),transparent_70%)]" />
+      <div className="rounded-[2rem] border border-line bg-white p-5 shadow-[var(--shadow-float)] sm:p-6">
+        <div className="flex items-center gap-3">
+          <span className="grid size-10 place-items-center rounded-full bg-brand-100 text-sm font-medium">AO</span>
+          <div>
+            <p className="font-semibold">Adaeze Okafor</p>
+            <p className="text-xs text-muted">Bakery Website Onboarding · 2 min ago</p>
+          </div>
+        </div>
+        <div className="mt-4 rounded-3xl border border-brand/30 bg-brand-50/40 p-4 text-[13px] sm:text-sm">
+          <p className="flex items-center gap-2 font-semibold text-brand-700"><Sparkles className="size-4" /> AI brief</p>
+          <p className="mt-2 leading-relaxed">
+            Adaeze runs a home bakery in Lekki and wants a website where customers can order cakes and pastries online and pay before delivery.
+          </p>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <div className="rounded-2xl bg-white px-3 py-2"><p className="text-[11px] text-muted">Budget</p><p className="font-semibold">₦300k - ₦800k</p></div>
+            <div className="rounded-2xl bg-white px-3 py-2"><p className="text-[11px] text-muted">Timeline</p><p className="font-semibold">Before 1 December</p></div>
+          </div>
+          <p className="mt-3 font-semibold">Scope</p>
+          <ul className="mt-1 space-y-1">
+            {["Menu with photos and prices", "Online ordering with Paystack", "Delivery areas and fees", "WhatsApp order alerts"].map((x) => (
+              <li key={x} className="flex gap-2"><Check className="mt-0.5 size-3.5 shrink-0 text-brand" /> {x}</li>
+            ))}
+          </ul>
+          <div className="mt-3 rounded-2xl bg-white p-3">
+            <p className="flex items-center gap-1.5 font-semibold"><HelpCircle className="size-3.5 text-brand-700" /> Ask before you quote</p>
+            <ol className="mt-1 list-decimal space-y-0.5 pl-4 text-muted">
+              <li>Who will take the product photos?</li>
+              <li>Do you deliver outside Lekki?</li>
+            </ol>
+          </div>
+        </div>
+        <div className="mt-3 flex items-center gap-2 rounded-2xl border border-line p-2 text-[13px]">
+          <span className="grid size-9 place-items-center rounded-xl bg-brand-50 text-brand-700"><Paperclip className="size-4" /></span>
+          <span className="min-w-0 flex-1 truncate">bakery-logo.png · menu-2026.pdf</span>
+          <Download className="mr-1 size-4 text-muted" />
+        </div>
+      </div>
     </div>
   );
 }

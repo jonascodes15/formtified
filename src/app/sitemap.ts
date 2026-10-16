@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { siteUrl } from "@/lib/site";
 import { TEMPLATES } from "@/lib/templates";
+import { DOCS } from "./docs/articles";
 
 // Bump this when the homepage, templates or legal pages change, so search engines re-read them.
 const UPDATED = new Date("2026-10-16");
@@ -12,6 +13,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: base, lastModified: UPDATED, changeFrequency: "weekly", priority: 1 },
     { url: `${base}/templates`, lastModified: UPDATED, changeFrequency: "weekly", priority: 0.9 },
     ...TEMPLATES.map((t) => ({ url: `${base}/templates/${t.key}`, lastModified: UPDATED, changeFrequency: "monthly" as const, priority: 0.8 })),
+    { url: `${base}/docs`, lastModified: UPDATED, changeFrequency: "monthly", priority: 0.6 },
+    ...DOCS.map((d) => ({ url: `${base}/docs/${d.slug}`, lastModified: UPDATED, changeFrequency: "monthly" as const, priority: 0.5 })),
     { url: `${base}/signup`, lastModified: UPDATED, changeFrequency: "yearly", priority: 0.5 },
     { url: `${base}/about`, lastModified: UPDATED, changeFrequency: "yearly", priority: 0.4 },
     { url: `${base}/privacy`, lastModified: UPDATED, changeFrequency: "yearly", priority: 0.2 },

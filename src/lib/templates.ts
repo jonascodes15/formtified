@@ -86,6 +86,7 @@ export const TEMPLATES: Template[] = [
       f("section", "Content and design"),
       f("single_choice", "Do you have your content (text, images) ready?", { options: ["Yes, all of it", "Some of it", "No, I need help"], why: "Missing content is the most common reason website projects stall. Knowing early lets you quote for writing or set a content deadline." }),
       f("single_choice", "Do you have a logo and brand colours?", { options: ["Yes", "Logo only", "No"], why: "Tells you whether branding work needs to come first." }),
+      f("file", "Upload your logo and any photos you want on the site", { help: "Optional. You can also send them later.", why: "Getting the files with the brief lets you check their quality before you quote, instead of chasing them mid-project." }),
       f("long_text", "Share 2-3 websites you like and what you like about them", { why: "Examples say more than words like \"clean\" or \"modern\", and show the level of polish they expect." }),
       f("single_choice", "Do you already have a domain and hosting?", { options: ["Both", "Domain only", "Neither", "Not sure"], why: "Avoids launch-day surprises and tells you whether to include setup in the quote." }),
       ...budgetTimeline(["Under ₦300k", "₦300k - ₦800k", "₦800k - ₦2m", "Above ₦2m"]),
@@ -250,6 +251,7 @@ export const TEMPLATES: Template[] = [
       f("multi_choice", "Which words describe the feel you want?", { options: ["Modern", "Classic", "Bold", "Elegant", "Playful", "Minimal", "Luxury", "Friendly"], why: "Shared words make feedback easier: you can ask whether a concept feels \"bold\" enough." }),
       f("short_text", "Colours you love or want to avoid", { why: "Clients often have strong feelings about colour that they only mention after the first draft." }),
       f("long_text", "Share logos you like and what you like about them", { why: "Examples are faster than descriptions, and show what \"simple\" or \"premium\" means to this client." }),
+      f("file", "Upload your current logo, sketches or logos you like", { help: "Optional. Screenshots are fine.", why: "Seeing the current logo tells you what to keep; a rough sketch often shows an idea the client can't put into words." }),
       f("long_text", "Anything you don't want in the logo?", { why: "Things to avoid, like a competitor's colour or an overused symbol, save whole rounds of revisions." }),
       f("multi_choice", "Where will the logo be used?", { options: ["Website", "Social media", "Signage", "Packaging", "Clothing/merch", "Vehicles", "Printed materials"], why: "Tiny social icons or embroidery limit how detailed the logo can be." }),
       f("multi_choice", "What files and extras do you need?", { options: ["Logo files only", "Colour palette", "Fonts", "Social media profile versions", "Business cards", "Brand guidelines"], why: "Defines the deliverables, so the project has a clear end." }),
@@ -305,6 +307,7 @@ export const TEMPLATES: Template[] = [
       f("section", "Style"),
       f("single_choice", "Do you have a logo and brand colours?", { options: ["Yes, I'll send them", "Logo only", "No"], why: "Tells you whether you're working within an existing brand or creating the look." }),
       f("long_text", "Share designs you like", { why: "Shows the style and the level of detail they expect." }),
+      f("file", "Upload your logo, brand files or designs you like", { why: "Working files and examples up front mean you can start designing straight away, in the right colours and fonts." }),
       f("short_text", "How many design options would you like to see?", { why: "Sets expectations for concepts and revisions before work starts." }),
       ...budgetTimeline(["Under ₦20k", "₦20k - ₦60k", "₦60k - ₦150k", "Above ₦150k"], { dateLabel: "When do you need the final files?" }),
     ],
@@ -388,6 +391,7 @@ export const TEMPLATES: Template[] = [
       f("multi_choice", "Which styles do you like?", { options: ["Modern", "Minimal", "Classic", "Contemporary African", "Industrial", "Scandinavian", "Luxury", "Not sure"], why: "Style words give you a starting point for mood boards." }),
       f("long_text", "Anything you want to keep?", { help: "Furniture, artwork, fittings.", why: "Existing pieces become fixed points the design has to work around." }),
       f("long_text", "Share photos or Pinterest/Instagram links you love", { why: "Saved images show taste far better than descriptions." }),
+      f("file", "Upload photos of the space", { help: "A few photos of each room, taken from the corners.", why: "Photos show the size, light and condition of the space before the site visit, so you arrive with better questions." }),
       ...budgetTimeline(["Under ₦1m", "₦1m - ₦5m", "₦5m - ₦15m", "Above ₦15m"]),
     ],
   },
@@ -612,6 +616,7 @@ export const TEMPLATES: Template[] = [
       f("multi_choice", "Which services do you need?", { ...req, options: ["Full planning", "On-the-day coordination", "Decor", "Catering", "Entertainment/MC/DJ", "Photography/video", "Guest management", "Rentals (chairs, tents)"], why: "Defines exactly what you're responsible for, so nothing falls between suppliers." }),
       f("long_text", "Describe the theme, colours or feel you want", { why: "The theme guides decor, invitations and supplier choices." }),
       f("long_text", "Share photos of events you love", { why: "Pictures help you price the level of decor they have in mind." }),
+      f("file", "Upload inspiration photos", { help: "Optional. Screenshots from Instagram or Pinterest are fine.", why: "Saved pictures show the decor, colours and scale they expect better than any description." }),
       ...budgetTimeline(["Under ₦1m", "₦1m - ₦5m", "₦5m - ₦15m", "Above ₦15m"], { budgetLabel: "What is your total budget for the event?", date: false }),
     ],
   },
@@ -638,7 +643,8 @@ export const TEMPLATES: Template[] = [
       f("long_text", "What is the key message?", { help: "The one thing the audience should remember.", why: "One clear message prevents work that tries to say everything." }),
       f("multi_choice", "Deliverables", { options: ["Design", "Video", "Copy", "Photos", "Social content", "Website/digital", "Print"], why: "A list of deliverables sets the scope and the price." }),
       f("section", "Context"),
-      f("long_text", "Brand guidelines, assets or references", { help: "Paste links.", why: "Existing assets keep the work consistent with the brand." }),
+      f("long_text", "Brand guidelines, assets or references", { help: "Paste links, or upload files below.", why: "Existing assets keep the work consistent with the brand." }),
+      f("file", "Upload brand files or references", { why: "Logos, fonts and guidelines in hand mean the first draft already looks on-brand." }),
       f("long_text", "Competitors or work you admire", { why: "Gives you a quality benchmark and shows what to stand apart from." }),
       f("short_text", "Who approves the work?", { why: "Knowing the decision-maker avoids surprise feedback late in the project." }),
       ...budgetTimeline(["Under ₦200k", "₦200k - ₦600k", "₦600k - ₦2m", "Above ₦2m"]),
@@ -736,7 +742,8 @@ export const TEMPLATES: Template[] = [
       ...contact({ business: false }),
       f("section", "The outfit"),
       f("single_choice", "What is the outfit for?", { options: ["Wedding/traditional event", "Party", "Work", "Everyday", "Uniform/group order"], why: "The occasion decides the style, the finish and how fixed the deadline is." }),
-      f("long_text", "Describe the style you want", { ...req, help: "Describe it or paste a link. You can also send pictures on WhatsApp.", why: "A clear description avoids the most common complaint: \"this isn't what I asked for\"." }),
+      f("long_text", "Describe the style you want", { ...req, help: "Describe it here, and upload pictures below if you have them.", why: "A clear description avoids the most common complaint: \"this isn't what I asked for\"." }),
+      f("file", "Upload pictures of the style", { why: "A picture of the exact style, plus the client's description, is the clearest brief a tailor can get." }),
       f("single_choice", "Will you provide the fabric?", { ...req, options: ["Yes, I'll bring it", "No, please source it", "Not sure"], why: "Sourcing fabric adds cost and time." }),
       f("short_text", "How many pieces?", { why: "Group orders need more time and often a different price." }),
       f("section", "Measurements and delivery"),
@@ -767,7 +774,8 @@ export const TEMPLATES: Template[] = [
       f("date", "Date needed", { ...req, why: "Lets you confirm availability before discussing anything else." }),
       f("short_text", "Number of guests (or cake size)", { ...req, why: "Servings decide the size and most of the price." }),
       f("multi_choice", "Flavours", { options: ["Vanilla", "Chocolate", "Red velvet", "Fruit cake", "Carrot", "Lemon", "Other"], why: "Some flavours need special ingredients, so it's best to know early." }),
-      f("long_text", "Describe the design", { ...req, help: "Colours, theme, toppers. Paste a link to a picture if you have one.", why: "A picture or detailed description avoids disappointment on the day." }),
+      f("long_text", "Describe the design", { ...req, help: "Colours, theme, toppers. You can upload a picture below.", why: "A picture or detailed description avoids disappointment on the day." }),
+      f("file", "Upload a picture of a cake you like", { why: "A reference picture shows the decoration and finish the client expects, and helps you price it." }),
       f("short_text", "Message or name on the cake", { why: "A spelling mistake on a cake can't be undone. Get the exact text in writing." }),
       f("short_text", "Allergies or dietary needs", { why: "Allergies are a safety issue, not a preference." }),
       f("section", "Delivery"),
@@ -787,7 +795,7 @@ export const questionCount = (t: Template) => t.fields.filter((x) => x.type !== 
 
 /** Rough time for a client to fill the form: long answers take longer than taps. */
 export function minutesToFill(t: Template) {
-  const seconds = t.fields.reduce((s, x) => s + (x.type === "section" ? 0 : x.type === "long_text" ? 60 : 15), 0);
+  const seconds = t.fields.reduce((s, x) => s + (x.type === "section" ? 0 : x.type === "long_text" || x.type === "file" ? 60 : 15), 0);
   return Math.max(2, Math.round(seconds / 60));
 }
 

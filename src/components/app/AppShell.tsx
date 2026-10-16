@@ -3,7 +3,7 @@
 import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FileText, WandSparkles, Inbox, UserRound, LayoutTemplate, Wallet, Shield, X } from "lucide-react";
+import { CircleHelp, FileText, WandSparkles, Inbox, UserRound, LayoutTemplate, Wallet, Shield, X } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { Drawer } from "@/components/Drawer";
 import { LogoutButton } from "@/components/LogoutButton";
@@ -27,6 +27,7 @@ const NAV = [
 const EXTRA = [
   { href: "/new", label: "Templates", icon: LayoutTemplate },
   { href: "/credits", label: "Credits", icon: Wallet },
+  { href: "/docs", label: "Help", icon: CircleHelp },
 ];
 
 export function AppShell({
@@ -100,7 +101,7 @@ export function AppShell({
               <div className="rounded-3xl bg-forest p-5 text-white">
                 <p className="text-sm text-white/70">Credits left</p>
                 <p className="display mt-1 text-3xl font-semibold">{credits}</p>
-                <p className="mt-1 text-xs text-white/60">1 credit = 1 AI-generated form</p>
+                <p className="mt-1 text-xs text-white/60">1 credit = 1 AI form or AI brief</p>
                 <Link href="/generate" className="btn btn-sm mt-4 w-full bg-lime text-forest hover:bg-white">
                   <WandSparkles className="size-4" /> New AI form
                 </Link>

@@ -162,3 +162,50 @@ CREATE TABLE IF NOT EXISTS auth_tokens (
 );
 CREATE INDEX IF NOT EXISTS idx_auth_tokens_user ON auth_tokens (user_id, purpose, created_at);
 CREATE INDEX IF NOT EXISTS idx_auth_tokens_hash ON auth_tokens (token_hash);
+
+-- ---------- File uploads, AI brief summaries and credit purchases (added later; safe to run on an existing database) ----------
+
+-- Files clients attach to a response. The file itself lives in Vercel Blob (private); this row says whose it is.
+CREATE TABLE IF NOT EXISTS uploads (
+  id           integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  form_id      integer NOT NULL REFERENCES forms(id) ON DELETE CASCADE,
+  response_id  integer NOT NULL REFERENCES responses(id) ON DELETE CASCADE,
+  field_id     varchar(40) NOT NULL,
+  url          varchar(600) NOT NULL,
+  pathname     varchar(400) NOT NULL,
+  name         varchar(200) NOT NULL,
+  size         integer NOT NULL,
+  content_type varchar(120) NOT NULL,
+  created_at   timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT uq_uploads_url UNIQUE (url)
+);
+CREATE INDEX IF NOT EXISTS idx_uploads_response ON uploads (response_id);
+
+-- One row each time a client starts uploading a file, to cap uploads per form per hour.
+CREATE TABLE IF NOT EXISTS upload_tokens (
+  form_id    integer NOT NULL REFERENCES forms(id) ON DELETE CASCADE,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_upload_tokens_form ON upload_tokens (form_id, created_at);
+
+-- The AI's one-page brief of a response, saved so it's only paid for once.
+ALTER TABLE responses ADD COLUMN IF NOT EXISTS summary jsonb NULL;
+ALTER TABLE responses ADD COLUMN IF NOT EXISTS summary_at timestamptz NULL;
+
+-- Credit packs bought through Paystack. amount is in kobo (₦1 = 100 kobo), as Paystack expects.
+CREATE TABLE IF NOT EXISTS payments (
+  id         integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  user_id    integer NULL REFERENCES users(id) ON DELETE SET NULL,
+  reference  varchar(64) NOT NULL,
+  pack       varchar(20) NOT NULL,
+  credits    integer NOT NULL,
+  amount     integer NOT NULL,
+  currency   varchar(3) NOT NULL DEFAULT 'NGN',
+  status     varchar(12) NOT NULL DEFAULT 'pending', -- 'pending' | 'success' | 'failed'
+  channel    varchar(30) NULL,                       -- card, bank, ussd, bank_transfer...
+  paid_at    timestamptz NULL,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT uq_payments_reference UNIQUE (reference)
+);
+CREATE INDEX IF NOT EXISTS idx_payments_user ON payments (user_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_payments_created ON payments (created_at);

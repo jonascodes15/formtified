@@ -2,6 +2,7 @@ import { execute, queryOne } from "@/lib/db";
 import { fail, ok, readJson } from "@/lib/api";
 import { getFormBySlug } from "@/lib/forms";
 import { appUrl, escapeHtml, sendEmail } from "@/lib/email";
+import { saveResponseFiles, uploadsEnabled, verifySubmittedFiles } from "@/lib/uploads";
 import type { Answers } from "@/lib/types";
 
 /** A client submits a filled form. No sign-in needed. */
@@ -11,17 +12,23 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
   if (!form) return fail("This form does not exist.", 404);
   if (form.status !== "published") return fail("This form is no longer accepting responses.", 403);
 
-  const body = await readJson<{ answers?: Record<string, unknown>; website?: string }>(req);
+  const body = await readJson<{ answers?: Record<string, unknown>; files?: unknown; website?: string }>(req);
   if (!body?.answers || typeof body.answers !== "object") return fail("Invalid submission.");
   if (body.website) return ok(); // honeypot field filled = bot. Pretend success.
 
+  const files = await verifySubmittedFiles(form, body.files);
   const answers: Answers = {};
   const missing: string[] = [];
   for (const field of form.fields) {
     if (field.type === "section") continue;
     const raw = body.answers[field.id];
     let value: string | string[] = "";
-    if (field.type === "multi_choice") {
+    if (field.type === "file") {
+      // If uploads are switched off, nobody can answer a file question, so don't block the form on it.
+      if (!uploadsEnabled()) continue;
+      // The answer is the list of file names; the files themselves are saved below.
+      value = (files.get(field.id) ?? []).map((f) => f.name);
+    } else if (field.type === "multi_choice") {
       value = Array.isArray(raw) ? raw.map((v) => String(v).slice(0, 200)).filter((v) => field.options?.includes(v) || v.startsWith("Other: ")).slice(0, 30) : [];
     } else {
       value = String(raw ?? "").trim().slice(0, 10000);
@@ -42,6 +49,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
     [form.id, JSON.stringify(answers), respondentName, respondentEmail],
   );
   const responseId = res!.id;
+  await saveResponseFiles(form.id, responseId, [...files.values()].flat());
 
   const who = respondentName || respondentEmail || "Someone";
   await execute("INSERT INTO notifications (user_id, form_id, response_id, message) VALUES ($1, $2, $3, $4)", [

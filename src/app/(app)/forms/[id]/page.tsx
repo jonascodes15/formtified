@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { getOwnedForm } from "@/lib/forms";
+import { uploadsEnabled } from "@/lib/uploads";
 import { TopBar } from "@/components/app/TopBar";
 import { FormEditor } from "@/components/app/FormEditor";
 
@@ -25,6 +26,7 @@ export default async function FormPage({ params }: { params: Promise<{ id: strin
           responseCount: form.response_count ?? 0,
           brief: form.brief,
         }}
+        uploads={uploadsEnabled()}
       />
     </>
   );

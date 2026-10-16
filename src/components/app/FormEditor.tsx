@@ -9,6 +9,7 @@ import {
 import { CHOICE_TYPES, FIELD_LABELS, FIELD_TYPES, type FieldType, type FormField } from "@/lib/types";
 import { FormRenderer } from "@/components/form/FormRenderer";
 import { useOrigin } from "@/lib/useOrigin";
+import { UPLOAD_MAX_FILES, UPLOAD_MAX_MB } from "@/lib/files";
 import { AnimatePresence, m } from "motion/react";
 
 interface EditorForm {
@@ -24,7 +25,7 @@ interface EditorForm {
 
 const newId = () => "f_" + Math.random().toString(16).slice(2, 10);
 
-export function FormEditor({ form }: { form: EditorForm }) {
+export function FormEditor({ form, uploads }: { form: EditorForm; uploads: boolean }) {
   const router = useRouter();
   const [title, setTitle] = useState(form.title);
   const [description, setDescription] = useState(form.description);
@@ -143,7 +144,7 @@ export function FormEditor({ form }: { form: EditorForm }) {
         <AnimatePresence mode="wait" initial={false}>
           {preview ? (
             <m.div key="preview" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8, transition: { duration: 0.12 } }} className="card p-5 sm:p-8">
-              <FormRenderer title={title} description={description} fields={fields} preview />
+              <FormRenderer title={title} description={description} fields={fields} preview uploads={uploads} />
             </m.div>
           ) : (
             <m.div key="questions" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8, transition: { duration: 0.12 } }} className="relative space-y-4">
@@ -177,6 +178,7 @@ export function FormEditor({ form }: { form: EditorForm }) {
                   >
                     <FieldCard
                       field={f}
+                      uploads={uploads}
                       index={i}
                       total={fields.length}
                       onChange={(p) => update(i, p)}
@@ -282,9 +284,10 @@ function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void 
 }
 
 function FieldCard({
-  field, index, total, onChange, onMove, onRemove, onDuplicate,
+  field, uploads, index, total, onChange, onMove, onRemove, onDuplicate,
 }: {
   field: FormField;
+  uploads: boolean;
   index: number;
   total: number;
   onChange: (p: Partial<FormField>) => void;
@@ -324,6 +327,14 @@ function FieldCard({
         className="mt-2 w-full bg-transparent px-1 py-1 text-sm text-muted outline-none"
         aria-label="Hint"
       />
+
+      {field.type === "file" && (
+        <p className={`mt-2 rounded-xl px-3 py-2 text-xs ${uploads ? "bg-canvas text-muted" : "bg-amber-50 text-amber-900"}`}>
+          {uploads
+            ? `Clients can attach up to ${UPLOAD_MAX_FILES} files, ${UPLOAD_MAX_MB} MB each: images, PDFs, documents, audio and video. Only you can open them.`
+            : "File uploads aren't switched on for this site yet, so clients will see this question but can't attach files. It won't stop them submitting."}
+        </p>
+      )}
 
       {isChoice && (
         <div className="mt-3 space-y-2">

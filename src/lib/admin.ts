@@ -1,6 +1,7 @@
 import "server-only";
 import { execute, query, queryOne } from "./db";
 import { appUrl, escapeHtml, sendEmailBatch } from "./email";
+import { deleteStoredFiles } from "./uploads";
 import type { SessionUser } from "./types";
 
 /**
@@ -320,6 +321,7 @@ export async function markVerified(userId: number) {
 
 /** Deletes the account and, through ON DELETE CASCADE, all of its forms, responses and notifications. */
 export async function deleteUser(userId: number) {
+  await deleteStoredFiles({ userId });
   const res = await execute("DELETE FROM users WHERE id = $1", [userId]);
   return res.rowCount > 0;
 }
@@ -393,6 +395,7 @@ export async function setFormStatus(formId: number, status: "published" | "close
 }
 
 export async function deleteFormAsAdmin(formId: number) {
+  await deleteStoredFiles({ formId });
   return queryOne<{ id: number; title: string }>("DELETE FROM forms WHERE id = $1 RETURNING id, title", [formId]);
 }
 

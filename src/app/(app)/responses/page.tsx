@@ -3,7 +3,8 @@ import { asJson, query } from "@/lib/db";
 import { listForms } from "@/lib/forms";
 import { TopBar } from "@/components/app/TopBar";
 import { ResponsesView } from "@/components/app/ResponsesView";
-import type { Answers } from "@/lib/types";
+import { filesForResponses } from "@/lib/uploads";
+import type { Answers, BriefSummary } from "@/lib/types";
 
 export const metadata = { title: "Responses" };
 
@@ -16,13 +17,15 @@ export default async function ResponsesPage({ searchParams }: { searchParams: Pr
 
   const rows = await query<{
     id: number; form_id: number; answers: unknown; respondent_name: string | null; respondent_email: string | null; is_read: boolean; created_at: Date;
+    summary: unknown;
   }>(
-    `SELECT r.id, r.form_id, r.answers, r.respondent_name, r.respondent_email, r.is_read, r.created_at
+    `SELECT r.id, r.form_id, r.answers, r.respondent_name, r.respondent_email, r.is_read, r.created_at, r.summary
      FROM responses r JOIN forms f ON f.id = r.form_id
      WHERE f.user_id = $1 ${selected ? "AND r.form_id = $2" : ""}
      ORDER BY r.created_at DESC LIMIT 300`,
     selected ? [user.id, selected] : [user.id],
   );
+  const files = await filesForResponses(rows.map((r) => r.id));
 
   return (
     <>
@@ -32,7 +35,10 @@ export default async function ResponsesPage({ searchParams }: { searchParams: Pr
         forms={forms.map((f) => ({ id: f.id, title: f.title, fields: f.fields, count: f.response_count ?? 0 }))}
         selectedForm={selected}
         initialOpen={sp.r ? Number(sp.r) : null}
+        credits={user.credits}
         responses={rows.map((r) => ({
+          summary: asJson<BriefSummary | null>(r.summary, null),
+          files: files.filter((x) => x.response_id === r.id).map(({ id, field_id, name, size, content_type }) => ({ id, field_id, name, size, content_type })),
           id: r.id,
           form_id: r.form_id,
           answers: asJson<Answers>(r.answers, {}),

@@ -3,15 +3,24 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Download, Inbox, Mail, Trash2, Search } from "lucide-react";
-import type { Answers, FormField } from "@/lib/types";
-import { initials, timeAgo } from "@/lib/format";
+import { ArrowLeft, Download, Inbox, Mail, Paperclip, Trash2, Search } from "lucide-react";
+import type { Answers, BriefSummary, FormField } from "@/lib/types";
+import { formatBytes, initials, timeAgo } from "@/lib/format";
+import { PREVIEWABLE_IMAGES } from "@/lib/files";
+import { BriefPanel } from "./BriefPanel";
 
 interface FormLite {
   id: number;
   title: string;
   fields: FormField[];
   count: number;
+}
+interface FileLite {
+  id: number;
+  field_id: string;
+  name: string;
+  size: number;
+  content_type: string;
 }
 interface Resp {
   id: number;
@@ -21,6 +30,8 @@ interface Resp {
   email: string | null;
   is_read: boolean;
   created_at: string;
+  summary: BriefSummary | null;
+  files: FileLite[];
 }
 
 export function ResponsesView({
@@ -28,16 +39,19 @@ export function ResponsesView({
   selectedForm,
   responses: initial,
   initialOpen,
+  credits: initialCredits,
 }: {
   forms: FormLite[];
   selectedForm: number | null;
   responses: Resp[];
   initialOpen: number | null;
+  credits: number;
 }) {
   const router = useRouter();
   const [responses, setResponses] = useState(() =>
     initial.map((r) => (r.id === initialOpen ? { ...r, is_read: true } : r)),
   );
+  const [credits, setCredits] = useState(initialCredits);
   const [openId, setOpenId] = useState<number | null>(initialOpen);
   const [q, setQ] = useState("");
 
@@ -135,7 +149,17 @@ export function ResponsesView({
 
         <div className={open ? "" : "hidden lg:block"}>
           {open ? (
-            <ResponseDetail response={open} form={formMap.get(open.form_id)} onBack={() => setOpenId(null)} onDelete={() => remove(open.id)} />
+            <ResponseDetail
+              response={open}
+              form={formMap.get(open.form_id)}
+              credits={credits}
+              onSummary={(summary, left) => {
+                setResponses((rs) => rs.map((x) => (x.id === open.id ? { ...x, summary } : x)));
+                setCredits(left);
+              }}
+              onBack={() => setOpenId(null)}
+              onDelete={() => remove(open.id)}
+            />
           ) : (
             <div className="card grid h-full min-h-64 place-items-center p-8 text-center text-muted">Select a response to read it.</div>
           )}
@@ -145,10 +169,25 @@ export function ResponsesView({
   );
 }
 
-function ResponseDetail({ response, form, onBack, onDelete }: { response: Resp; form?: FormLite; onBack: () => void; onDelete: () => void }) {
+function ResponseDetail({
+  response,
+  form,
+  credits,
+  onSummary,
+  onBack,
+  onDelete,
+}: {
+  response: Resp;
+  form?: FormLite;
+  credits: number;
+  onSummary: (s: BriefSummary, credits: number) => void;
+  onBack: () => void;
+  onDelete: () => void;
+}) {
   const fields = form?.fields ?? [];
   const known = new Set(fields.map((f) => f.id));
   const orphan = Object.entries(response.answers).filter(([k]) => !known.has(k));
+  const who = response.name || response.email || "Anonymous";
 
   return (
     <article className="card p-5 sm:p-8 animate-rise">
@@ -174,9 +213,24 @@ function ResponseDetail({ response, form, onBack, onDelete }: { response: Resp; 
         </div>
       </div>
 
+      <div className="mt-6">
+        <BriefPanel key={response.id} responseId={response.id} summary={response.summary} credits={credits} clientName={who} onSummary={onSummary} />
+      </div>
+
       <dl className="mt-6 space-y-5">
         {fields.map((f) => {
           if (f.type === "section") return <h3 key={f.id} className="display pt-3 text-lg font-semibold text-brand-700">{f.label}</h3>;
+          if (f.type === "file") {
+            const attached = response.files.filter((x) => x.field_id === f.id);
+            return (
+              <div key={f.id}>
+                <dt className="text-sm font-medium text-muted">{f.label}</dt>
+                <dd className="mt-2">
+                  {attached.length ? <Attachments files={attached} /> : <span className="text-[15px] italic text-soft">No files</span>}
+                </dd>
+              </div>
+            );
+          }
           const v = response.answers[f.id];
           const text = Array.isArray(v) ? v.join(", ") : v;
           return (
@@ -198,5 +252,35 @@ function ResponseDetail({ response, form, onBack, onDelete }: { response: Resp; 
         )}
       </dl>
     </article>
+  );
+}
+
+/** A client's attached files: photos show as thumbnails, everything else as a download row. */
+function Attachments({ files }: { files: FileLite[] }) {
+  return (
+    <ul className="grid gap-2 sm:grid-cols-2">
+      {files.map((f) => {
+        const isImage = PREVIEWABLE_IMAGES.includes(f.content_type);
+        return (
+          <li key={f.id} className="flex items-center gap-3 rounded-2xl border border-line p-2 pr-3">
+            {isImage ? (
+              <a href={`/api/files/${f.id}`} target="_blank" className="shrink-0" aria-label={`Open ${f.name}`}>
+                {/* eslint-disable-next-line @next/next/no-img-element -- private file served by our own API, not optimisable */}
+                <img src={`/api/files/${f.id}`} alt="" loading="lazy" className="size-12 rounded-xl bg-canvas object-cover" />
+              </a>
+            ) : (
+              <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-700"><Paperclip className="size-5" /></span>
+            )}
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-sm font-medium">{f.name}</span>
+              <span className="text-xs text-soft">{formatBytes(f.size)}</span>
+            </span>
+            <a href={`/api/files/${f.id}?download=1`} className="grid size-9 shrink-0 place-items-center rounded-full hover:bg-canvas" aria-label={`Download ${f.name}`} title="Download">
+              <Download className="size-4" />
+            </a>
+          </li>
+        );
+      })}
+    </ul>
   );
 }

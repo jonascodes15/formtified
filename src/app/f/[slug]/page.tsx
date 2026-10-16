@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getFormBySlug } from "@/lib/forms";
+import { uploadsEnabled } from "@/lib/uploads";
 import { FormRenderer } from "@/components/form/FormRenderer";
 import { LogoMark } from "@/components/Logo";
 
@@ -41,7 +42,14 @@ export default async function PublicFormPage({ params }: Props) {
               <p className="mt-2 text-muted">This form is no longer accepting responses. Please contact {form.owner_name}.</p>
             </div>
           ) : (
-            <FormRenderer title={form.title} description={form.description} fields={form.fields} slug={form.slug} ownerName={form.owner_name} />
+            <FormRenderer
+              title={form.title}
+              description={form.description}
+              fields={form.fields}
+              slug={form.slug}
+              ownerName={form.owner_name}
+              uploads={uploadsEnabled()}
+            />
           )}
         </div>
         <Link href="/" className="mt-8 flex items-center justify-center gap-2 text-sm text-muted hover:text-ink">

@@ -36,8 +36,12 @@ export default function PrivacyPage() {
           <strong>Your forms:</strong> the forms you create, and the project descriptions and answers you give the AI when it writes a form for you.
         </li>
         <li>
-          <strong>Your clients&apos; responses:</strong> whatever your clients type into your forms. This can include their name, email, phone number and
-          project details.
+          <strong>Your clients&apos; responses:</strong> whatever your clients type into your forms, and any files they attach. This can include their
+          name, email, phone number, project details, photos and documents.
+        </li>
+        <li>
+          <strong>Payments:</strong> when you buy credits, the pack, amount, payment reference, payment method type (for example card or bank
+          transfer) and whether it succeeded. Your card or bank details go to Paystack and are never seen or stored by us.
         </li>
         <li>
           <strong>Visits:</strong> the page visited, the website that sent the visitor (its domain only), the country, device type and browser. We don&apos;t
@@ -55,7 +59,8 @@ export default function PrivacyPage() {
       <ul>
         <li>To run your account, store your forms and deliver your clients&apos; responses to you.</li>
         <li>To send emails you need: sign-up codes, password resets, response alerts and occasional announcements about Formtified.</li>
-        <li>To write forms with AI when you ask us to.</li>
+        <li>To write forms and response briefs with AI when you ask us to.</li>
+        <li>To process credit-pack payments and send receipts.</li>
         <li>To keep Formtified secure, prevent abuse, and understand which pages are used so we can improve them.</li>
       </ul>
       <p>We don&apos;t sell your data, and we don&apos;t use your forms or your clients&apos; answers for advertising.</p>
@@ -63,12 +68,14 @@ export default function PrivacyPage() {
       <h2>Who we share it with</h2>
       <p>Only the companies that help us run Formtified, and only what they need:</p>
       <ul>
-        <li><strong>Vercel</strong> hosts the website.</li>
+        <li><strong>Vercel</strong> hosts the website and stores files your clients upload (privately: only you can open them).</li>
         <li><strong>Neon</strong> hosts the database.</li>
         <li><strong>Resend</strong> delivers our emails.</li>
+        <li><strong>Paystack</strong> processes credit-pack payments and receives your email address and the amount.</li>
         <li>
           <strong>Our AI provider</strong> receives the project description and answers you type when you generate a form, so it can write the questions.
-          Your clients&apos; responses are not sent to the AI.
+          A client&apos;s response is sent to the AI only when you ask for an AI brief of that response. Uploaded files are never sent to the AI, only
+          their names.
         </li>
       </ul>
       <p>We may also share information if the law requires it.</p>
@@ -76,13 +83,14 @@ export default function PrivacyPage() {
       <h2>Your clients&apos; information</h2>
       <p>
         When you send a form, you decide what to ask your clients and what to do with their answers. We store and deliver those answers for you. Please
-        only ask for what you need, and don&apos;t use Formtified to collect passwords, card numbers or other sensitive details.
+        only ask for what you need, and don&apos;t use Formtified to collect passwords, card numbers, ID documents or other sensitive details.
       </p>
 
       <h2>Keeping and deleting data</h2>
       <p>
         We keep your data while your account is open. You can delete any form or response in your dashboard at any time; deleting a form also deletes its
-        responses. To delete your whole account and everything in it, email {mail} from your account&apos;s email address.
+        responses and their files. Files a client uploads but never submits are deleted automatically after a day. To delete your whole account and
+        everything in it, email {mail} from your account&apos;s email address. We keep payment records for as long as tax and accounting laws require.
       </p>
 
       <h2>Security</h2>

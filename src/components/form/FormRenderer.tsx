@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Check } from "lucide-react";
 import type { FormField } from "@/lib/types";
+import { FileInput, type UploadedFile } from "./FileInput";
 
 type Value = string | string[];
 
@@ -14,6 +15,7 @@ export function FormRenderer({
   preview,
   ownerName,
   titleAs: Title = "h1",
+  uploads = false,
 }: {
   title: string;
   description?: string | null;
@@ -23,8 +25,12 @@ export function FormRenderer({
   ownerName?: string;
   /** "h2" when the form is shown inside another page that already has its own main heading. */
   titleAs?: "h1" | "h2";
+  /** Whether file storage is set up, so clients can attach files. */
+  uploads?: boolean;
 }) {
   const [values, setValues] = useState<Record<string, Value>>({});
+  const [files, setFiles] = useState<Record<string, UploadedFile[]>>({});
+  const [uploading, setUploading] = useState(0);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
@@ -35,12 +41,21 @@ export function FormRenderer({
     setValues((s) => ({ ...s, [id]: v }));
     if (errors[id]) setErrors((e) => ({ ...e, [id]: "" }));
   };
+  const addFile = (id: string, file: UploadedFile) => {
+    setFiles((s) => ({ ...s, [id]: [...(s[id] ?? []), file] }));
+    if (errors[id]) setErrors((e) => ({ ...e, [id]: "" }));
+  };
+  const removeFile = (id: string, url: string) => setFiles((s) => ({ ...s, [id]: (s[id] ?? []).filter((f) => f.url !== url) }));
+  // A file question's answer is its list of file names.
+  const answerOf = (f: FormField): Value | undefined => (f.type === "file" ? (files[f.id] ?? []).map((x) => x.name) : values[f.id]);
+  // Without file storage nobody can answer a file question, so it never blocks the form.
+  const skip = (f: FormField) => f.type === "section" || (f.type === "file" && !uploads);
 
   function validate() {
     const next: Record<string, string> = {};
     for (const f of fields) {
-      if (f.type === "section") continue;
-      const v = values[f.id];
+      if (skip(f)) continue;
+      const v = answerOf(f);
       const empty = Array.isArray(v) ? v.length === 0 : !String(v ?? "").trim();
       if (f.required && empty) next[f.id] = "This question is required.";
       else if (!empty && f.type === "email" && !/^\S+@\S+\.\S+$/.test(String(v))) next[f.id] = "Enter a valid email address.";
@@ -63,12 +78,17 @@ export function FormRenderer({
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setServerError("");
+    if (uploading > 0) {
+      setServerError("Please wait for your files to finish uploading.");
+      return;
+    }
     if (!validate() || preview || !slug) return;
     setSubmitting(true);
+    const sentFiles = Object.fromEntries(Object.entries(files).map(([id, list]) => [id, list.map(({ url, name }) => ({ url, name }))]));
     const res = await fetch(`/api/public/${slug}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ answers: values, website: honeypot }),
+      body: JSON.stringify({ answers: values, files: sentFiles, website: honeypot }),
     });
     const data = await res.json().catch(() => ({}));
     setSubmitting(false);
@@ -110,7 +130,7 @@ export function FormRenderer({
   // How much of the form is filled in, for the progress bar.
   const answered = fields.filter((f) => {
     if (f.type === "section") return false;
-    const v = values[f.id];
+    const v = answerOf(f);
     return Array.isArray(v) ? v.length > 0 : Boolean(String(v ?? "").trim());
   }).length;
   const progress = n ? answered / n : 0;
@@ -161,7 +181,22 @@ export function FormRenderer({
               </label>
               {f.help && <p className="mt-1 text-sm text-muted">{f.help}</p>}
               <div className="mt-3">
-                <Input field={f} value={values[f.id]} onChange={(v) => set(f.id, v)} invalid={Boolean(errors[f.id])} />
+                {f.type === "file" ? (
+                  <FileInput
+                    id={f.id}
+                    slug={slug}
+                    fieldId={f.id}
+                    files={files[f.id] ?? []}
+                    onAdd={(file) => addFile(f.id, file)}
+                    onRemove={(url) => removeFile(f.id, url)}
+                    onBusy={(busy) => setUploading((n) => n + (busy ? 1 : -1))}
+                    disabled={preview || !uploads}
+                    disabledNote={preview ? "Your client attaches files here." : "File uploads aren't available on this form right now."}
+                    invalid={Boolean(errors[f.id])}
+                  />
+                ) : (
+                  <Input field={f} value={values[f.id]} onChange={(v) => set(f.id, v)} invalid={Boolean(errors[f.id])} />
+                )}
               </div>
               {errors[f.id] && <p className="mt-1.5 text-sm text-red-600 animate-error-in">{errors[f.id]}</p>}
             </div>
@@ -174,7 +209,7 @@ export function FormRenderer({
 
       {serverError && <p className="mt-6 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700 animate-error-in">{serverError}</p>}
       <button type="submit" disabled={submitting || preview} className="btn-primary mt-10 h-13 w-full text-base sm:w-auto sm:px-10">
-        {preview ? "Submit (disabled in preview)" : submitting ? "Sending…" : "Submit"}
+        {preview ? "Submit (disabled in preview)" : submitting ? "Sending…" : uploading > 0 ? "Uploading files…" : "Submit"}
       </button>
     </form>
   );

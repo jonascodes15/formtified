@@ -2,6 +2,7 @@ import { apiUser } from "@/lib/auth";
 import { execute } from "@/lib/db";
 import { fail, notFound, ok, readJson, unauthorized } from "@/lib/api";
 import { getOwnedForm, sanitizeFields } from "@/lib/forms";
+import { deleteStoredFiles } from "@/lib/uploads";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -35,7 +36,9 @@ export async function PATCH(req: Request, { params }: Ctx) {
 export async function DELETE(_req: Request, { params }: Ctx) {
   const user = await apiUser();
   if (!user) return unauthorized();
-  const res = await execute("DELETE FROM forms WHERE id = $1 AND user_id = $2", [Number((await params).id), user.id]);
-  if (!res.rowCount) return notFound();
+  const form = await getOwnedForm(user.id, Number((await params).id));
+  if (!form) return notFound();
+  await deleteStoredFiles({ formId: form.id });
+  await execute("DELETE FROM forms WHERE id = $1", [form.id]);
   return ok();
 }

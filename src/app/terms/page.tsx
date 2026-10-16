@@ -40,22 +40,35 @@ export default function TermsPage() {
       <p>Don&apos;t use Formtified to:</p>
       <ul>
         <li>collect passwords, bank or card details, or pretend to be another person or company (phishing);</li>
+        <li>collect or share malware, illegal content, or files you have no right to receive;</li>
         <li>send spam, or share forms with people who haven&apos;t agreed to hear from you;</li>
         <li>collect information illegally, or harass, threaten or deceive anyone;</li>
         <li>break, overload or get around the limits and security of the service.</li>
       </ul>
       <p>We may remove forms or suspend accounts that break these rules, without notice where needed to protect others.</p>
 
-      <h2>AI-written forms</h2>
+      <h2>AI-written forms and briefs</h2>
       <p>
-        Forms written by AI are a starting point. They can contain mistakes or miss things, so review and edit every form before you send it. You&apos;re
-        responsible for the final form.
+        Forms and response briefs written by AI are a starting point. They can contain mistakes or miss things, so review every form before you send it
+        and check every brief against your client&apos;s full answers. You&apos;re responsible for the final form and for any quote or decision you make.
       </p>
 
-      <h2>Credits and plans</h2>
+      <h2>Files</h2>
       <p>
-        One AI credit creates one AI-written form. Free credits have no cash value and can&apos;t be transferred. If we sell credit packs or plans, the
-        price and what&apos;s included will be shown before you pay. We may change what&apos;s free, with notice for anything you&apos;ve already paid for.
+        Files your clients upload are stored privately for you. Don&apos;t ask clients to upload anything illegal or anything you don&apos;t have a right to
+        receive. We may remove files that break these terms.
+      </p>
+
+      <h2>Credits and payments</h2>
+      <p>
+        AI credits are used for AI-written forms and AI briefs; the Credits page shows how many each one uses. Credit packs are paid in Naira through
+        Paystack, and the price and number of credits are shown before you pay. Credits never expire, have no cash value and can&apos;t be transferred to
+        another account.
+      </p>
+      <p>
+        If you were charged but didn&apos;t receive your credits, or were charged twice, email {mail} with the payment reference and we&apos;ll add the
+        credits or refund the payment. Otherwise, payments for credits are not refundable, except where the law requires a refund. We may change prices
+        and what&apos;s free, but credits you&apos;ve already bought keep working.
       </p>
 
       <h2>Availability</h2>

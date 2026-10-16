@@ -101,6 +101,23 @@ export function passwordChangedEmail(name: string) {
   };
 }
 
+export function receiptEmail(name: string, p: { packName: string; credits: number; amount: string; reference: string; balance: number }) {
+  return {
+    subject: `Receipt: ${p.credits} Formtified credits`,
+    html: accountEmail(`
+      <p>Hi ${firstName(name)},</p>
+      <p>Thanks for your payment. <b>${p.credits} credits</b> have been added to your account.</p>
+      <table style="font-size:14px;border-collapse:collapse;margin:16px 0">
+        <tr><td style="padding:4px 16px 4px 0;color:#6b7a70">Pack</td><td>${escapeHtml(p.packName)}</td></tr>
+        <tr><td style="padding:4px 16px 4px 0;color:#6b7a70">Amount</td><td>${escapeHtml(p.amount)}</td></tr>
+        <tr><td style="padding:4px 16px 4px 0;color:#6b7a70">Reference</td><td>${escapeHtml(p.reference)}</td></tr>
+        <tr><td style="padding:4px 16px 4px 0;color:#6b7a70">Credits now</td><td>${p.balance}</td></tr>
+      </table>
+      <p><a href="${appUrl()}/credits" style="color:#2f7a3c">View your credits</a></p>
+    `),
+  };
+}
+
 export function escapeHtml(s: string) {
   return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 }

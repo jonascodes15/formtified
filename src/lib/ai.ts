@@ -1,7 +1,7 @@
 import "server-only";
 import { execute, queryOne } from "./db";
 import { sanitizeFields } from "./forms";
-import type { FormField } from "./types";
+import type { BriefSummary, FormField } from "./types";
 
 /**
  * Works with any OpenAI-compatible chat API.
@@ -147,7 +147,8 @@ Rules:
 - Use long_text where the client should narrate features, goals, users, or examples. Ask them to list every feature.
 - Choice fields (single_choice, multi_choice, dropdown) must include "o" with 2-8 options.
 - Mark essentials required ("r":true). Budget and timeline questions use ranges as options when relevant.
-Types: section, short_text, long_text, email, phone, url, number, date, single_choice, multi_choice, dropdown.
+- Add one "file" field when the client may have files to share (logo, brand assets, photos, documents, examples). Never more than 2.
+Types: section, short_text, long_text, email, phone, url, number, date, single_choice, multi_choice, dropdown, file.
 Reply with JSON only:
 {"t":"form title","d":"one friendly sentence for the client","f":[{"y":"type","l":"label","h":"hint","p":"placeholder","r":true,"o":["option"]}]}`;
 
@@ -179,4 +180,54 @@ export async function generateForm(userId: number, brief: string, answers: { q: 
   const title = String(obj.t ?? obj.title ?? "Client onboarding form").trim().slice(0, 200) || "Client onboarding form";
   const description = String(obj.d ?? obj.description ?? "").trim().slice(0, 500) || null;
   return { title, description, fields, ms: r.ms };
+}
+
+// ---------- Brief summary of a client's response ----------
+
+const SUMMARY_PROMPT = `You turn a client's answers to an onboarding form into a one-page project brief for the freelancer who sent the form.
+Rules:
+- Use only what the client wrote. Never invent facts, features, prices, names or dates.
+- Write budgets, prices and dates exactly as the client wrote them. If the client didn't give one, use "".
+- Plain English, short sentences, no marketing language. Speak about "the client".
+- "missing": questions the freelancer should ask before quoting, because an answer is missing, vague or contradictory.
+- "risks": things that could cause trouble (tight deadline vs big scope, unclear budget, missing content, dependencies). Empty if none.
+Reply with JSON only:
+{"overview":"2-3 sentences: who the client is and what they want","goals":["what success looks like"],"scope":["each deliverable, page or feature"],"budget":"","timeline":"","notes":["style, examples, preferences, constraints"],"risks":[""],"missing":["question for the client"]}`;
+
+const LIMITS = { goals: 6, scope: 14, notes: 8, risks: 5, missing: 6 } as const;
+
+export async function summarizeResponse(
+  userId: number,
+  form: { title: string; fields: FormField[] },
+  answers: Record<string, string | string[]>,
+): Promise<BriefSummary> {
+  const lines = [`Form: ${form.title}`];
+  for (const f of form.fields) {
+    if (f.type === "section") {
+      lines.push(`\n## ${f.label}`);
+      continue;
+    }
+    const a = answers[f.id];
+    const text = Array.isArray(a) ? a.join(", ") : (a ?? "");
+    lines.push(`Q: ${f.label}\nA: ${f.type === "file" && text ? `(attached files) ${text}` : text.slice(0, 1500) || "(no answer)"}`);
+  }
+  const r = await chatJson(SUMMARY_PROMPT, lines.join("\n").slice(0, 14000), 2500);
+  await logUsage(userId, "summary", r);
+
+  const obj = (r.json ?? {}) as Record<string, unknown>;
+  const str = (v: unknown, max = 400) => (typeof v === "string" ? v.trim().slice(0, max) : "");
+  const list = (v: unknown, max: number) =>
+    (Array.isArray(v) ? v : []).map((x) => str(x, 300)).filter(Boolean).slice(0, max);
+  const summary: BriefSummary = {
+    overview: str(obj.overview, 900),
+    goals: list(obj.goals, LIMITS.goals),
+    scope: list(obj.scope, LIMITS.scope),
+    budget: str(obj.budget, 200),
+    timeline: str(obj.timeline, 200),
+    notes: list(obj.notes, LIMITS.notes),
+    risks: list(obj.risks, LIMITS.risks),
+    missing: list(obj.missing, LIMITS.missing),
+  };
+  if (!summary.overview && !summary.scope.length) throw new AiError("The AI returned an empty brief. Please try again.");
+  return summary;
 }

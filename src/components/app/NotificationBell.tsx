@@ -10,7 +10,7 @@ interface Item {
   id: number;
   form_id: number | null;
   response_id: number | null;
-  kind: string; // "response" | "admin"
+  kind: string; // "response" | "admin" | "payment"
   title: string | null;
   message: string;
   link: string | null;
@@ -93,7 +93,7 @@ export function NotificationBell() {
               <ul className="max-h-96 overflow-auto">
                 {items.map((n) => {
                   const isAdminNote = n.kind === "admin";
-                  const href = isAdminNote
+                  const href = n.kind !== "response"
                     ? n.link
                     : n.form_id
                       ? `/responses?form=${n.form_id}${n.response_id ? `&r=${n.response_id}` : ""}`

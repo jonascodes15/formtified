@@ -79,7 +79,30 @@ Without `RESEND_API_KEY`, the app skips emails. You still get notifications in t
 
 Until the domain is verified, Resend's test sender can only email the address you signed up to Resend with.
 
-## 4. Admin dashboard
+## 4. File uploads (optional, Vercel Blob)
+
+Clients can attach files to a **File upload** question (up to 5 files, 10 MB each). Files go from the client's browser straight to Vercel Blob as **private** files; only the form's owner can open them, through `/api/files/<id>`.
+
+1. In Vercel, open your project → **Storage** → **Create** → **Blob**, name it (for example `formtified-files`) and connect it to the project. Vercel adds `BLOB_READ_WRITE_TOKEN` for you.
+2. Redeploy.
+3. To test uploads on your computer, copy `BLOB_READ_WRITE_TOKEN` from the Blob store's **.env.local** tab into your `.env.local`.
+
+Without the token, file questions show "uploads aren't available" and never stop a client from submitting.
+
+**Daily clean-up.** If a client uploads a file but never submits, the file is deleted the next day by `/api/cron/cleanup` (scheduled in `vercel.json`). Add a `CRON_SECRET` environment variable in Vercel (any long random string) so only Vercel can run it.
+
+## 5. Payments (optional, Paystack)
+
+Credit packs are sold on Paystack's checkout page. Prices live in `src/lib/credits.ts`.
+
+1. Sign up at https://paystack.com. In **Settings → API Keys & Webhooks**, copy the **Test Secret Key** (`sk_test_...`) into `PAYSTACK_SECRET_KEY` in `.env.local` and Vercel.
+2. On the same page, set **Test Webhook URL** to `https://yourdomain.com/api/paystack/webhook`.
+3. Buy a pack with one of Paystack's test cards to check it works.
+4. When Paystack has approved your business, switch both to the **Live** key and **Live Webhook URL**, and redeploy.
+
+Credits are added only after Formtified checks with Paystack's API that the payment succeeded and the amount is right, and each payment adds credits once, even if the webhook and the return page both arrive. Without the key, the Credits page shows "coming soon".
+
+## 6. Admin dashboard
 
 A private area at `/admin` for running the platform.
 
@@ -106,14 +129,14 @@ Everyone else gets a "page not found" at `/admin`, so the area stays hidden.
 
 **Suspending a user** signs them out immediately and stops them signing in. Their forms stay online. To take a form down, close it from the Forms page.
 
-**Plans** are `free`, `starter`, `pro` and `studio` (listed in `src/lib/types.ts`). Any plan except `free` counts as a paid subscriber. Payments aren't connected yet, so you set plans by hand on a user's page.
+**Plans** are `free`, `starter`, `pro` and `studio` (listed in `src/lib/types.ts`). Any plan except `free` counts as a paid subscriber. Buying a credit pack sets the plan to the biggest pack the user has bought; you can also change it by hand on a user's page.
 
 ## How the AI keeps costs down
 
 - **Two small calls per form.** The first call returns up to 4 clarifying questions (capped at 900 tokens). The second returns the form (capped at 4,000 tokens). Users can skip the questions.
 - **Compact output.** The AI replies in JSON with one-letter keys (`l` for label, `o` for options, and so on). This cuts the output by about a third. The server then expands and validates it (`src/lib/ai.ts`, `sanitizeFields` in `src/lib/forms.ts`).
 - **Short "thinking".** `reasoning_effort: "low"` keeps the model from spending tokens on reasoning.
-- **Credits and rate limits.** Each generated form costs 1 credit. The credit is refunded if generation fails. There's also a per-user hourly cap (`AI_HOURLY_LIMIT`).
+- **Credits and rate limits.** Each generated form costs 1 credit, and so does each AI brief of a response (saved, so viewing it again is free). The credit is refunded if the AI fails. There's also a per-user hourly cap (`AI_HOURLY_LIMIT`).
 - **Usage log.** Every AI call is logged in the `ai_usage` table with its tokens and time. To see your spend:
   `SELECT kind, COUNT(*), AVG(ms), SUM(prompt_tokens + completion_tokens) FROM ai_usage GROUP BY kind;`
 
@@ -131,7 +154,10 @@ src/lib/
   auth.ts                      Sign-in cookie, getUser / requireUser
   ai.ts                        Prompts + AI calls (change prompts here)
   forms.ts                     Form queries, link (slug) creation, field validation
-  templates.ts                 The 6 free templates (edit or add your own)
+  templates.ts                 The free templates, also shown as public pages at /templates
+  credits.ts                   What things cost in credits, and the credit packs (prices)
+  paystack.ts                  Checkout, payment confirmation and webhook checks
+  files.ts, uploads.ts         File-upload rules, and storing/deleting client files
   email.ts                     Resend emails (single and batch)
   admin.ts                     Every admin dashboard query and action
   analytics.ts                 Cookie-free site visit tracking
@@ -139,8 +165,11 @@ src/app/
   page.tsx                     Landing page
   login/, signup/              Sign-in screen
   (app)/                       Signed-in area (sidebar on desktop, bottom nav on mobile)
-    dashboard/  generate/  forms/[id]/  responses/  templates/  account/  credits/
+    dashboard/  generate/  forms/[id]/  responses/  new/  account/  credits/
   f/[slug]/                    The public form your clients fill
+  brief/[id]/                  Printable brief of one response (Save as PDF)
+  docs/                        Help Center; articles live in docs/articles.tsx
+  templates/                   Public template library
   admin/                       Admin dashboard pages (only for ADMIN_EMAILS)
   api/                         Backend routes (auth, ai, forms, public submit, export, track, admin...)
 src/components/                UI pieces (admin/ holds the dashboard's charts, tables and forms)
@@ -167,9 +196,8 @@ src/components/                UI pieces (admin/ holds the dashboard's charts, t
 - **"AI is not configured"**: Add `AI_API_KEY` and restart the server.
 - **"The AI is busy right now" (429)**: You've hit Groq's free-tier rate limit. Wait a minute, or add billing on Groq.
 
-## What's next (not in v1)
+## What's next
 
-- Payments for credit packs (Paystack). The Credits page already shows placeholder packs.
-- Password reset by email.
-- File uploads in forms (logos, reference images).
 - Your own branding on public forms.
+- Voice-note answers, transcribed by AI.
+- Conditional questions (show a question based on an earlier answer).
