@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ArrowRight, Building2, Globe, MessageCircle, ShieldCheck, Target } from "lucide-react";
 import { PublicShell } from "@/components/landing/PublicShell";
 import { JsonLd } from "@/components/JsonLd";
-import { COMPANY, CONTACT_EMAIL, FOUNDER, SITE_NAME, siteUrl } from "@/lib/site";
+import { COMPANY, CONTACT_EMAIL, FOUNDER, SHARE_IMAGE, SITE_NAME, siteUrl } from "@/lib/site";
 import founderPhoto from "./founder.jpg";
 
 const DESCRIPTION = `Formtified is built by ${COMPANY.name} in ${COMPANY.location}. Meet the team behind the client onboarding forms for freelancers and agencies.`;
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   title: "About Us",
   description: DESCRIPTION,
   alternates: { canonical: "/about" },
-  openGraph: { title: "About Formtified", description: DESCRIPTION, url: "/about" },
+  openGraph: { title: "About Formtified", description: DESCRIPTION, url: "/about", images: [SHARE_IMAGE] },
 };
 
 const BELIEFS = [

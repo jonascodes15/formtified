@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowRight, Clock, ListChecks, Sparkles } from "lucide-react";
 import { PublicShell } from "@/components/landing/PublicShell";
 import { JsonLd } from "@/components/JsonLd";
-import { siteUrl } from "@/lib/site";
+import { SHARE_IMAGE, siteUrl } from "@/lib/site";
 import { CATEGORIES, TEMPLATES, minutesToFill, questionCount } from "@/lib/templates";
 
 const DESCRIPTION = `${TEMPLATES.length} free client questionnaire and onboarding form templates for freelancers and agencies: websites, apps, logos, branding, social media, photography, events and more.`;
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   title: "Free Client Questionnaire & Onboarding Form Templates",
   description: DESCRIPTION,
   alternates: { canonical: "/templates" },
-  openGraph: { title: "Free client questionnaire templates", description: DESCRIPTION, url: "/templates" },
+  openGraph: { title: "Free client questionnaire templates", description: DESCRIPTION, url: "/templates", images: [SHARE_IMAGE] },
 };
 
 const slug = (c: string) => c.toLowerCase().replace(/[^a-z]+/g, "-").replace(/^-|-$/g, "");

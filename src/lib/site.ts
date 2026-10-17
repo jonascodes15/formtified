@@ -5,6 +5,17 @@ export const SITE_TAGLINE = "Client onboarding forms for freelancers & agencies"
 export const SITE_DESCRIPTION =
   "Create client onboarding forms and project questionnaires in seconds with AI or free templates. Share one link on WhatsApp or email and get every answer in one dashboard.";
 
+/**
+ * The site-wide link-preview image (src/app/opengraph-image.png, made from real Formtified screens).
+ * A page that sets its own `openGraph` replaces the inherited one, so it must list this image too.
+ */
+export const SHARE_IMAGE = {
+  url: "/opengraph-image.png",
+  width: 1200,
+  height: 630,
+  alt: "Formtified: client onboarding forms for freelancers and agencies, shown on a dashboard and a phone",
+};
+
 /** The company that builds and runs Formtified. Shown in the footer, legal pages and About page. */
 export const COMPANY = {
   name: "Weblanda Technologies Ltd",

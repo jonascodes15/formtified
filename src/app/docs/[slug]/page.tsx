@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight, ChevronRight, Mail } from "lucide-react";
 import { PublicShell } from "@/components/landing/PublicShell";
 import { JsonLd } from "@/components/JsonLd";
-import { CONTACT_EMAIL, siteUrl } from "@/lib/site";
+import { CONTACT_EMAIL, SHARE_IMAGE, siteUrl } from "@/lib/site";
 import { DOCS, DOC_GROUPS, getDoc } from "../articles";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: `${doc.title} · Help`,
     description: doc.description,
     alternates: { canonical: `/docs/${doc.slug}` },
-    openGraph: { type: "article", title: doc.title, description: doc.description, url: `/docs/${doc.slug}` },
+    openGraph: { type: "article", title: doc.title, description: doc.description, url: `/docs/${doc.slug}`, images: [SHARE_IMAGE] },
   };
 }
 

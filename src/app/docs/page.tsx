@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowRight, BookOpen, CreditCard, Inbox, Rocket, Send, Wrench } from "lucide-react";
 import { PublicShell } from "@/components/landing/PublicShell";
 import { JsonLd } from "@/components/JsonLd";
-import { CONTACT_EMAIL, siteUrl } from "@/lib/site";
+import { CONTACT_EMAIL, SHARE_IMAGE, siteUrl } from "@/lib/site";
 import { DOCS, DOC_GROUPS } from "./articles";
 
 const DESCRIPTION = "How to create client onboarding forms with AI or templates, share them on WhatsApp, collect files, summarise responses and manage credits.";
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   title: "Help Center",
   description: DESCRIPTION,
   alternates: { canonical: "/docs" },
-  openGraph: { title: "Formtified Help Center", description: DESCRIPTION, url: "/docs" },
+  openGraph: { title: "Formtified Help Center", description: DESCRIPTION, url: "/docs", images: [SHARE_IMAGE] },
 };
 
 const ICONS = { "Getting started": Rocket, "Building forms": Wrench, Sharing: Send, Responses: Inbox, "Account and credits": CreditCard } as const;
